@@ -43,16 +43,6 @@ class BaseApiManager(BaseWorld):
             matched_objs.append(dumped_obj)
         return sorted(matched_objs, key=lambda p: p.get(sort, 0))
 
-    def delete_object(self, object_name: str, search: dict = None):
-        for obj in self._data_svc.ram[object_name]:
-            if not search or obj.match(search):
-                data = self._data_svc.ram[object_name].copy()
-                data.remove(obj)
-                self._data_svc.ram[object_name] = data
-
-    def update_object(self, object_name: str, parameters: dict):
-        pass
-
     @staticmethod
     def dump_object_with_filters(obj: Any, include: List[str] = None, exclude: List[str] = None) -> dict:
         dumped = obj.display
