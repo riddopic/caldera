@@ -23,7 +23,7 @@ function sharedData() {
         },
 
         deleteTab(index) {
-            if (this.openTabs.length > 1) this.openTabs.splice(index, 1);
+            if (this.openTabs.length > 0) this.openTabs.splice(index, 1);
         }
     }
 }
