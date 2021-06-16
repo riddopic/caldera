@@ -1,7 +1,6 @@
 module.exports = {
     plugins: [
-        "html",
-        "jinja2"
+        "html"
     ],
     extends: "airbnb-base",
     env: {
@@ -33,7 +32,6 @@ module.exports = {
         "no-undef": "off",
         "no-unused-vars": "off",
         "no-use-before-define": "off",
-        "no-var": "off",
-        "object-shorthand": "off"
+        "no-var": "off"
     }
 };
