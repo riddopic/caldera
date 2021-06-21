@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* HELPFUL functions to call */
 
 function restRequest(type, data, callback, endpoint='/api/rest') {
