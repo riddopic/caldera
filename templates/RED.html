@@ -64,8 +64,8 @@
                     <ul>
                         <template x-for="(tab, index) in openTabs" :key="index">
                             <li x-bind:class="activeTabIndex === index ? 'is-active' : ''" draggable="true">
-                                <a x-on:click="activeTabIndex = index">
-                                    <span x-text="tab.name"></span>
+                                <a>
+                                    <span x-text="tab.name" x-on:click="activeTabIndex = index"></span>
                                     <span x-on:click="deleteTab(index, tab.contentID)" class="icon is-small is-close"><i class="fas fa-times"></i></span>
                                 </a>
                             </li>

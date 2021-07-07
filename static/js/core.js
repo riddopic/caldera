@@ -31,8 +31,8 @@ function alpineNavigation() {
 
         deleteTab(index, contentID) {
             document.getElementById(contentID).remove();
-            this.activeTabIndex -= 1;
             this.openTabs.splice(index, 1);
+            this.activeTabIndex = this.openTabs.length > 0 ? this.openTabs.length - 1 : 0;
         },
     };
 }
