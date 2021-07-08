@@ -15,6 +15,7 @@ function alpineNavigation() {
             document.getElementById('active-tab-display').appendChild(newTabDiv);
         },
 
+        // TODO: don't add a tab for fieldmanual, since it's an external link
         addTab(tabName, address) {
             const existingTabIndex = this.openTabs.findIndex((tab) => tab.name === tabName);
             if (existingTabIndex === -1) {
