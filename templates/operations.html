@@ -1,3 +1,96 @@
+<div x-data="alpineOperations()">
+    <div>
+        <div>
+            <h2>Operations</h2>
+            <p>
+                Start a new operation or review previous ones here.
+            </p>
+        </div>
+        <hr>
+        <div>
+            <input id="view-ops" value="view" type="radio" x-model="currentView">
+            <label for="view-ops">View Operations</label>
+            <input id="add-ops" value="add" type="radio" x-model="currentView">
+            <label for="add-ops">Add Operations</label>
+        </div>
+        <template x-if="currentView === 'view'">
+            <div>
+                <h3>View</h3>
+                <form>
+                    <div class="field">
+                        <label class="label">Choose an operation:</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="operation-select" x-on:change="loadPlanner()" x-model="selectedOperation">
+                                    <option value="" disabled selected>Select an existing operation</option>
+                                    {% for op in operations %}
+                                        {%  if op.start|length%}
+    <!--                                TODO: check that this works-->
+    <!--                                    <option :id="'{{ op.id|e }}-{{ op.name|e }}'" :value="'{{ op.id|e }}'">{{ op.name|e }} - {{ op.start|e }}</option>-->
+                                        <option class="operationOption" id="{{ op.id|e }}-{{ op.name|e }}" value="{{ op.id|e }}">{{ op.name|e }} - {{ op.start|e }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">
+                                <label for="agent-output">include agent output</label>
+                            </div>
+                        </div>
+                    </div>
+            </form>
+            </div>
+        </template>
+        <template x-if="currentView === 'add'">
+            <div class="field">
+                <h3>Add Operations</h3>
+                <form x-data="operation">
+                    <label for="op-name">Operation name</label>
+                    <input id="op-name" type="text" x-model="name">
+                    <div>
+                        <h3>Basic options</h3>
+                    </div>
+                    <div>
+                        <h3>Autonomous</h3>
+                    </div>
+                    <div>
+                        <h3>Stealth</h3>
+                    </div>
+                    <div>
+                        <h3>Schedule</h3>
+                    </div>
+                </form>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    function alpineOperations() {
+        return {
+            selectedOperation: '',
+            operations: [],
+            isAgentOutputSelected: false,
+            currentView: 'view',
+            operation: {
+                name: ''
+            }
+
+            // function downloadOperationInfo(format) {
+            //     let selectedOperationId = $('#operation-list option:selected').attr('value');
+            //     let agentOutput = $('#agent-output').prop("checked");
+            //     let postData = selectedOperationId ? {
+            //         'index':'operation_report',
+            //         'op_id': selectedOperationId,
+            //         'agent_output': Number(agentOutput),
+            //         'format': format,
+            //     } : null;
+            //     let selectedOpName = $('#operation-list option:selected').text();
+            //     downloadReport('/api/rest', selectedOpName, postData);
+            // }
+        }
+    }
+</script>
+
+
 <div id="operations" class="section-profile">
   <div class="row">
     <div class="bottomright duk-icon"><img onclick="toggleSidebar('operations-sidebar')" src="/gui/img/expand.png"></div>
@@ -309,7 +402,7 @@
 
 <script>
     /* eslint-disable */
-    
+
     let refresher = setInterval(refresh, 10000);
     $('.section-profile').bind('destroyed', function() {
         clearInterval(refresher);
