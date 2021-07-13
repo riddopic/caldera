@@ -61,20 +61,20 @@
                 <section class="modal-card-body">
                     <form>
                         <label for="op-name">Operation name</label>
-                        <input id="op-name" type="text" x-effect="editOperationField('name', $el, 'input')">
+                        <input id="op-name" type="text" x-model="newOperation.name" x-effect="editOperationField('name', $el.value)">
                         <template x-for="item in newOperation">
                             <p x-text="item"></p>
                         </template>
                         <div>
                             <h3>Basic options</h3>
                             <form>
-                                <select x-effect="editOperationField('group', $el)">
+                                <select x-model="newOperation.group" x-effect="editOperationField('group', $el.querySelector('option[selected]').value)">
                                     <option value="" selected>Use all groups</option>
                                     {% for g in groups %}
                                     <option value="{{ g|e }}">{{ g|e }}</option>
                                     {% endfor %}
                                 </select>
-                                <select x-effect="editOperationField('adversary', $el)">
+                                <select x-model="newOperation.adversary" x-effect="editOperationField('adversary', $el.querySelector('option[selected]').value)">
                                     <option value="" selected>No adversary (manual)</option>
                                     {% for adv in adversaries %}
                                     {% if adv.has_repeatable_abilities %}
@@ -89,12 +89,12 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-effect="editOperationField('autoClose', $el)">
+                                <select x-model="newOperation.autoClose" x-effect="editOperationField('autoClose', $el.querySelector('option[selected]').value)">
                                     <option value="0" selected>Keep open forever</option>
                                     <option value="1">Auto close operation</option>
                                 </select>
-                                <select x-effect="editOperationField('run', $el)">
-                                    <option value="running">Run immediately</option>
+                                <select x-model="newOperation.run" x-effect="editOperationField('run', $el.querySelector('option[selected]').value)">
+                                    <option value="running" selected>Run immediately</option>
                                     <option value="paused">Pause on start</option>
                                 </select>
                             </form>
@@ -102,11 +102,11 @@
                         <div>
                             <h3>Autonomous</h3>
                             <form>
-                                <select x-effect="editOperationField('autonomous', $el)">
+                                <select x-model="newOperation.autonomous" x-effect="editOperationField('autonomous', $el.querySelector('option[selected]').value)">
                                     <option value="1" selected>Run autonomously</option>
                                     <option value="0">Require manual approval</option>
                                 </select>
-                                <select x-effect="editOperationField('planner', $el)">
+                                <select x-model="newOperation.planner" x-effect="editOperationField('planner', $el.querySelector('option[selected]').value)">
                                     {% for p in planners %}
                                     {% if p.name == "atomic" %}
                                     <option value="{{ p.name|e }}" selected>Use {{ p.name|e }} planner</option>
@@ -118,42 +118,42 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-effect="editOperationField('source', $el)">
+                                <select x-model="newOperation.source" x-effect="editOperationField('source', $el.querySelector('option').value)">
                                     {% for s in sources %}
                                     <option value="{{ s.name|e }}">Use {{ s.name|e }} facts</option>
                                     {% endfor %}
                                 </select>
-                                <select x-effect="editOperationField('parsers', $el)">
+                                <select x-model="newOperation.parsers" x-effect="editOperationField('parsers', $el.querySelector('option[selected]').value)">
                                     <option value="1" selected>Use default parsers</option>
                                     <option value="0">Do not use default parsers</option>
                                 </select>
                                 <label for="queueTimeout">Cleanup Timeout (secs)</label>
-                                <input x-effect="editOperationField('timeout', $el, 'input')" id="queueTimeout" type="number" value="30" min="0" max="300"
+                                <input x-model="newOperation.timeout" x-effect="editOperationField('timeout', $el.value)" id="queueTimeout" type="number" value="30" min="0" max="300"
                                        onchange="stream('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
                             </form>
                         </div>
                         <div>
                             <h3>Stealth</h3>
                             <form>
-                                <select x-effect="editOperationField('obfuscator', $el)">
+                                <select x-model="newOperation.obfuscator" x-effect="editOperationField('obfuscator', $el.querySelector('option').value)">
                                     {% for o in obfuscators %}
                                         <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
                                     {% endfor %}
                                 </select>
                                 <label for="queueJitter">Jitter (min/max) sec</label>
-                                <input x-effect="editOperationField('jitter', $el, 'input')" id="queueJitter"/>
+                                <input x-model="newOperation.jitter" x-effect="editOperationField('jitter', $el.value)" id="queueJitter"/>
                                 <label for="queueVisibility">Adjust visibility: </label>
-                                <input x-effect="editOperationField('visibility', $el, 'input')" id="queueVisibility" type="range" value="50" min="1" max="100" onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
+                                <input x-model="newOperation.visibility" x-effect="editOperationField('visibility', $el.value)" id="queueVisibility" type="range" value="50" min="1" max="100" onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
                             </form>
                         </div>
                         <div>
                             <h3>Schedule</h3>
                             <form>
                                 <label for="schedule-time">Schedule operation</label>
-                                <input x-effect="editOperationField('schedule', $el, 'input')" type="time" id="schedule-time">
-                                <button onclick="handleScheduleAction()">
-                                    Schedule
-                                </button>
+                                <input x-model="newOperation.schedule" x-effect="editOperationField('schedule', $el.value)" type="time" id="schedule-time">
+<!--                                <button onclick="handleScheduleAction()">-->
+<!--                                    Schedule-->
+<!--                                </button>-->
                             </form>
                         </div>
                     </form>
@@ -179,7 +179,6 @@
                 group: '',
                 adversary: '',
                 autoClose: '',
-                // is running default?
                 run: '',
                 autonomous: '',
                 planner: '',
@@ -192,15 +191,9 @@
                 schedule: '',
             },
 
-            editOperationField(fieldName, el, type = 'option[selected]') {
-
+            editOperationField(fieldName, newValue) {
               if (this.newOperation[fieldName] !== null) {
-                  if (type === 'input') {
-                      this.newOperation[fieldName] = el.value;
-                  }
-                  else if (el.querySelector(type)) {
-                      this.newOperation[fieldName] = el.querySelector(type).value;
-                  }
+                  this.newOperation[fieldName] = newValue;
               }
             },
 
