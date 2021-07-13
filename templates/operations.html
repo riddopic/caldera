@@ -62,9 +62,6 @@
                     <form>
                         <label for="op-name">Operation name</label>
                         <input id="op-name" type="text" x-model="newOperation.name" x-effect="editOperationField('name', $el.value)">
-                        <template x-for="item in newOperation">
-                            <p x-text="item"></p>
-                        </template>
                         <div>
                             <h3>Basic options</h3>
                             <form>
