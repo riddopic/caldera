@@ -9,25 +9,28 @@
         <hr>
         <div class="columns">
             <div class="column">
-                <h3>View</h3>
-                <form>
+                <form class="m-1">
                     <div class="field">
-                        <label class="label">Choose an operation:</label>
+                        <label class="label">Choose an operation to view:</label>
                         <div class="control">
                             <div class="select">
                                 <select id="operation-select" x-on:change="loadPlanner()" x-model="selectedOperation">
-<!--                                    TODO deprecate disabled and make errors-->
-                                    <option value="" disabled selected>Select an existing operation</option>
-                                    {% for op in operations %}
-                                        {% if op.start|length%}
-                                        <!--                                TODO: check that this works-->
-                                            <option id="{{ op.id|e }}-{{ op.name|e }}" value="{{ op.id|e }}">{{ op.name|e }} - {{ op.start|e }}
-                                            </option>
-                                        {% endif %}
-                                    {% endfor %}
+                                    <!--                                    TODO deprecate disabled and make errors-->
+                                    <option value="" default selected>Select an existing operation</option>
+                                    <template x-for="op in operations"></template>
+<!--                                    {% for op in operations %}-->
+<!--                                    {% if op.start|length%}-->
+<!--                                    &lt;!&ndash;                                TODO: check that this works&ndash;&gt;-->
+<!--                                    <option id="{{ op.id|e }}-{{ op.name|e }}" value="{{ op.id|e }}">{{ op.name|e }} - -->
+<!--                                        {{ op.start|e }}-->
+<!--                                    </option>-->
+<!--                                    {% endif %}-->
+<!--                                    {% endfor %}-->
                                 </select>
-                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">
-                                <label for="agent-output">include agent output</label>
+                                <div class="p-1">
+                                    <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">
+                                    <label class="pl-1" for="agent-output">include agent output</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -35,7 +38,7 @@
             </div>
             <div class="column is-flex is-flex-direction-column is-align-items-flex-end space">
                 <div class="py-1">
-                    <button class="button is-primary" x-on:click="showAddModal = true">+ Add operation
+                    <button class="button is-primary" x-on:click="isAddModalOpen = true">+ Add operation
                     </button>
                 </div>
                 <div class="py-1">
@@ -51,27 +54,33 @@
         </div>
     </div>
 
-    <template x-if="showAddModal">
+    <template x-if="isAddModalOpen">
         <div class="modal is-active">
             <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Add Operation</p>
-                </header>
-                <section class="modal-card-body">
-                    <form>
+            <form class="m-1">
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title">Start New Operation</p>
+                    </header>
+                    <section class="modal-card-body">
+                        <template x-for="item in currentOperation">
+                            <p x-text="item"></p>
+                        </template>
                         <label for="op-name">Operation name</label>
-                        <input id="op-name" type="text" x-model="newOperation.name" x-effect="editOperationField('name', $el.value)" required>
+                        <input id="op-name" type="text" x-model="currentOperation.name"
+                               x-effect="editOperationField('name', $el.value)" required>
                         <div>
-                            <h3>Basic options</h3>
-                            <form>
-                                <select x-model="newOperation.group" x-effect="editOperationField('group', $el.selectedOptions[0].value)">
+                            <p class="heading pt-2">Basic options</p>
+                            <div class="m-1">
+                                <select x-model="currentOperation.group"
+                                        x-effect="editOperationField('group', $el.selectedOptions[0].value)">
                                     <option value="" selected>Use all groups</option>
                                     {% for g in groups %}
                                     <option value="{{ g|e }}">{{ g|e }}</option>
                                     {% endfor %}
                                 </select>
-                                <select x-model="newOperation.adversary" x-effect="editOperationField('adversary', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.adversary"
+                                        x-effect="editOperationField('adversary', $el.selectedOptions[0].value)">
                                     <option value="" selected>No adversary (manual)</option>
                                     {% for adv in adversaries %}
                                     {% if adv.has_repeatable_abilities %}
@@ -86,36 +95,43 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-model="newOperation.autoClose" x-effect="editOperationField('autoClose', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.autoClose"
+                                        x-effect="editOperationField('autoClose', $el.selectedOptions[0].value)">
                                     <option value="0" selected>Keep open forever</option>
                                     <option value="1">Auto close operation</option>
                                 </select>
-                                <select x-model="newOperation.run" x-effect="editOperationField('run', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.run"
+                                        x-effect="editOperationField('run', $el.selectedOptions[0].value)">
                                     <option value="running" selected>Run immediately</option>
                                     <option value="paused">Pause on start</option>
                                 </select>
-                            </form>
+                            </div>
                         </div>
                         <div>
-                            <h3>Autonomous</h3>
-                            <form>
-                                <select x-model="newOperation.autonomous" x-effect="editOperationField('autonomous', $el.selectedOptions[0].value)">
+                            <p class="heading pt-2">Autonomous</p>
+                            <div class="m-1">
+                                <select x-model="currentOperation.autonomous"
+                                        x-effect="editOperationField('autonomous', $el.selectedOptions[0].value)">
                                     <option value="1" selected>Run autonomously</option>
                                     <option value="0">Require manual approval</option>
                                 </select>
-                                <select x-model="newOperation.planner" x-effect="editOperationField('planner', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.planner"
+                                        x-effect="editOperationField('planner', $el.selectedOptions[0].value)">
                                     {% for p in planners %}
                                     {% if p.name == "atomic" %}
                                     <option value="{{ p.name|e }}" selected>Use {{ p.name|e }} planner</option>
                                     {% elif p.allow_repeatable_abilities %}
                                     <!--                                    TODO deprecate data-allow-repeatable-abilities?-->
-                                    <option value="{{ p.name|e }}" data-allow-repeatable-abilities>Use {{ p.name|e }} planner</option>
+                                    <option value="{{ p.name|e }}" data-allow-repeatable-abilities>Use {{ p.name|e }}
+                                        planner
+                                    </option>
                                     {% else %}
                                     <option value="{{ p.name|e }}">Use {{ p.name|e }} planner</option>
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-model="newOperation.source" x-effect="editOperationField('source', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.source"
+                                        x-effect="editOperationField('source', $el.selectedOptions[0].value)">
                                     {% for s in sources %}
                                     {% if loop.first %}
                                     <option value="{{ s.name|e }}" selected>Use {{ s.name|e }} facts</option>
@@ -124,87 +140,161 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-model="newOperation.parsers" x-effect="editOperationField('parsers', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.parsers"
+                                        x-effect="editOperationField('parsers', $el.selectedOptions[0].value)">
                                     <option value="1" selected>Use default parsers</option>
                                     <option value="0">Do not use default parsers</option>
                                 </select>
-                                <label for="queueTimeout">Cleanup Timeout (secs)</label>
-                                <input x-model="newOperation.timeout" x-effect="editOperationField('timeout', $el.value)" id="queueTimeout" type="number" value="30" min="0" max="300"
+                                <label class="heading pt-2" for="queueTimeout">Cleanup Timeout (secs)</label>
+                                <input x-model="currentOperation.timeout"
+                                       x-effect="editOperationField('timeout', $el.value)" id="queueTimeout"
+                                       type="number" placeholder="30" value="30" min="0" max="300"
                                        onchange="stream('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
-                            </form>
+                            </div>
                         </div>
                         <div>
-                            <h3>Stealth</h3>
-                            <form>
-                                <select x-model="newOperation.obfuscator" x-effect="editOperationField('obfuscator', $el.selectedOptions[0].value)">
+                            <p class="heading pt-2">Stealth</p>
+                            <div class="m-1">
+                                <select x-model="currentOperation.obfuscator"
+                                        x-effect="editOperationField('obfuscator', $el.selectedOptions[0].value)">
                                     {% for o in obfuscators %}
                                     {% if loop.first %}
-                                        <option value="{{ o.name|e }}" selected>{{ o.name|e }} obfuscation</option>
+                                    <option value="{{ o.name|e }}" selected>{{ o.name|e }} obfuscation</option>
                                     {% else %}
-                                        <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
+                                    <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <label for="queueJitter">Jitter (min/max) sec</label>
-                                <input x-model="newOperation.jitter" x-effect="editOperationField('jitter', $el.value)" id="queueJitter" value="0" type="number"/>
-                                <label for="queueVisibility">Adjust visibility: </label>
-                                <input x-model="newOperation.visibility" x-effect="editOperationField('visibility', $el.value)" id="queueVisibility" type="range" value="50" min="1" max="100" onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
-                            </form>
+                                <label class="heading pt-2" for="queueJitter" required>Jitter (min/max) sec</label>
+                                <input x-model="currentOperation.jitter"
+                                       x-effect="editOperationField('jitter', $el.value)"
+                                       id="queueJitter" value="4/8" type="text" pattern="[0-9\/0-9]*"
+                                       placeholder="4/8"/>
+                                <label class="heading pt-2" for="queueVisibility">Adjust visibility: </label>
+                                <input x-model="currentOperation.visibility"
+                                       x-effect="editOperationField('visibility', $el.value)" id="queueVisibility"
+                                       type="range" value="50" min="1" max="100"
+                                       onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
+                                <span x-text="currentOperation.visibility"></span>
+                            </div>
                         </div>
                         <div>
-                            <h3>Schedule</h3>
-                            <form>
-                                <label for="schedule-time">Schedule operation</label>
-                                <input x-model="newOperation.schedule" x-effect="editOperationField('schedule', $el.value)" type="time" id="schedule-time">
-<!--                                <button onclick="handleScheduleAction()">-->
-<!--                                    Schedule-->
-<!--                                </button>-->
-                            </form>
+                            <div class="m-1">
+                                <label class="heading pt-2" for="schedule-time">Schedule operation</label>
+                                <input x-model="currentOperation.schedule"
+                                       x-effect="editOperationField('schedule', $el.value)" type="time"
+                                       id="schedule-time" value="00:00">
+                            </div>
                         </div>
-                    </form>
-                </section>
-                <footer class="modal-card-foot">
-                    <!--                    TODO when user clicks on add operation it should show on view screen-->
-                    <button class="button is-primary is-small" x-on:click="addOperation">Add Operation</button>
-                    <button class="button is-small" x-on:click="showAddModal = false">Cancel</button>
-                </footer>
-            </div>
+                    </section>
+                    <footer class="modal-card-foot">
+                        <!--                    TODO when user clicks on add operation it should show on view screen-->
+                        <!--                    TODO add tooltip for scheduling &#45;&#45; user must set AM/PM along with numerical time value in order for schedule to work-->
+                        <button class="button is-primary is-small" x-on:click="handleStartOperation"
+                                x-text="currentOperation.schedule ? 'Schedule' : 'Start'"></button>
+                        <button class="button is-small" x-on:click="isAddModalOpen = false">Cancel</button>
+                    </footer>
+                </div>
+            </form>
         </div>
     </template>
 </div>
 
 <script>
+    let loadedOperations = {{ operations | tojson }}
     function alpineOperations() {
         return {
+            toast: '',
             selectedOperation: null,
             isAgentOutputSelected: false,
-            showAddModal: false,
-            newOperation: {
-                name: '',
-                group: '',
-                adversary: '',
-                autoClose: '',
-                run: '',
-                autonomous: '',
-                planner: '',
-                source: '',
-                parsers: '',
-                timeout: '',
-                obfuscator: '',
-                jitter: '',
-                visibility: '',
-                schedule: '',
+            isAddModalOpen: false,
+            operations: loadedOperations,
+            currentOperation: {
+                name: "",
+                group: "",
+                adversary: "",
+                autoClose: "",
+                run: "",
+                autonomous: "",
+                planner: "",
+                source: "",
+                parsers: "",
+                timeout: "",
+                obfuscator: "",
+                jitter: "",
+                visibility: "",
+                schedule: "",
             },
 
             editOperationField(fieldName, newValue) {
-                if (this.newOperation[fieldName] !== null) {
-                  this.newOperation[fieldName] = newValue;
-              }
+                if (fieldName === 'jitter') {
+                    console.log('CURRENT VAL', newValue)
+                    if (!newValue.includes('/')) return;
+                    let [jitterMin, jitterMax] = newValue.split("/");
+                    jitterMin = parseInt(jitterMin);
+                    jitterMax = parseInt(jitterMax);
+                    console.log('JITTERBUG', newValue, 'min', jitterMin, 'max', jitterMax, !jitterMin, !jitterMax)
+                    if (jitterMin < 0 || jitterMax < 0) {
+                        toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
+                        return;
+                    }
+                    if (jitterMin >= jitterMax) {
+                        toast('Error: Jitter MIN must be less than the jitter MAX.');
+                        return;
+                    }
+                }
+                if (this.currentOperation[fieldName] !== null) {
+                    this.currentOperation[fieldName] = newValue;
+                }
+                console.log('NEW OPERATION', fieldName, newValue, this.currentOperation);
+                console.log('LOADEDOPS0', this.operations)
             },
 
-            addOperation() {
-                console.log('ADD OPERATION', this.newOperation);
+            handleStartOperation() {
+                if (!this.currentOperation.jitter) {
+                    this.currentOperation.jitter = "4/8";
+                }
+                if (!this.currentOperation.name) {
+                    toast('Error: Operation name field is empty.');
+                    return;
+                } else if (this.currentOperation.schedule) {
+                    restRequest('PUT', {
+                        'index': 'schedule',
+                        'operation': this.currentOperation,
+                        'schedule': {'hour': parseInt(time.split(":")[0]), 'minute': parseInt(time.split(":")[1])}
+                    });
+                    toast('Scheduled operation ' + this.currentOperation.name + "!");
+                } else {
+                    restRequest('PUT', this.currentOperation, () => {
+                        toast('Notice that you can pause or stop the operation at any time.');
+                        toast('Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.');
+                        this.operations.push(this.currentOperation);
+                    });
+                    toast('Started operation ' + this.currentOperation.name + "!");
+                }
+                this.isAddModalOpen = false;
+            },
+
+            resetCurrentOperation() {
+                console.log('CURR', this.currentOperation);
+                for (const field in this.currentOperation) {
+                    console.log('FIEDL', field);
+                    this.currentOperation[field] = "";
+                }
+                console.log('CURR NOW', this.currentOperation);
             }
+
         }
     }
 </script>
+
+<style>
+    .column {
+        margin: 0;
+    }
+
+    /*input:invalid:required::after {*/
+    /*    color: white;*/
+    /*    content: "*";*/
+    /*}*/
+</style>
