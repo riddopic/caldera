@@ -192,6 +192,7 @@
 </div>
 
 <script>
+    const endpoint = '/api/v2/operations';
     function alpineOperations() {
         return {
             toast: '',
@@ -218,10 +219,10 @@
             schedule: "",
 
             getOperations() {
-                restRequest('POST', {'index':'operations'}, (data) => {
-                    this.operations = JSON.parse(data);
-                    console.log('OPS RECEIVED', data, this.operations);
-                });
+                restRequest('GET', {}, (res) => {
+                    this.operations = JSON.parse(res);
+                    console.log('getOperations() RESPONSE RECEIVED', res, this.operations);
+                }, endpoint);
             },
 
             editOperationField(fieldName, newValue) {
@@ -243,7 +244,6 @@
                 if (this.currentOperation[fieldName] !== null) {
                     this.currentOperation[fieldName] = newValue;
                 }
-                console.log('LOADED OPS', this.operations);
             },
 
             handleStartOperation() {
@@ -274,6 +274,7 @@
             },
 
             resetCurrentOperation() {
+                // if (!this.currentOperation
                 for (const field in this.currentOperation) {
                     if (field !== 'index') this.currentOperation[field] = "";
                 }
