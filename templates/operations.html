@@ -243,7 +243,6 @@
                 if (this.currentOperation[fieldName] !== null) {
                     this.currentOperation[fieldName] = newValue;
                 }
-                console.log('LOADED OPS', this.operations);
             },
 
             handleStartOperation() {
@@ -260,15 +259,15 @@
                         'schedule': {'hour': parseInt(time[0]), 'minute': parseInt(time[1])}
                     });
                     this.isAddModalOpen = false;
-                    toast('Scheduled operation ' + this.currentOperation.name + "!");
+                    toast('Scheduled operation ' + this.currentOperation.name + "!", true);
                 } else {
                     restRequest('PUT', this.currentOperation, () => {
-                        toast('Notice that you can pause or stop the operation at any time. Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.');
-                        // this.resetCurrentOperation();
+                        toast('Notice that you can pause or stop the operation at any time. Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.', true);
+                        this.resetCurrentOperation();
                         this.getOperations();
                         document.getElementById('opForm').reset();
                     });
-                    toast('Started operation ' + this.currentOperation.name + "!");
+                    toast('Started operation ' + this.currentOperation.name + "!", true);
                     this.isAddModalOpen = false;
                 }
             },
