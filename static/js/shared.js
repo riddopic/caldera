@@ -1,8 +1,8 @@
 /* eslint-disable */
 /* HELPFUL functions to call */
 
-function restRequest(requestType, data, callback = () => {
-    console.log('do nothing')
+function restRequest(requestType, data, callback = (r) => {
+    console.log('Fetch Success', r);
 }, endpoint = '/api/rest') {
     const requestData = requestType === 'GET' ?
         {method: requestType, headers: {'Content-Type': 'application/json'}} :
