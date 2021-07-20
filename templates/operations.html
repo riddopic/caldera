@@ -1,4 +1,4 @@
-<div x-data="alpineOperations()">
+<div x-data="alpineOperations()" x-init="getOperations()">
     <div>
         <div>
             <h2>Operations</h2>
@@ -17,15 +17,9 @@
                                 <select id="operation-select" x-on:change="loadPlanner()" x-model="selectedOperation">
                                     <!--                                    TODO deprecate disabled and make errors-->
                                     <option value="" default selected>Select an existing operation</option>
-                                    <template x-for="op in operations"></template>
-<!--                                    {% for op in operations %}-->
-<!--                                    {% if op.start|length%}-->
-<!--                                    &lt;!&ndash;                                TODO: check that this works&ndash;&gt;-->
-<!--                                    <option id="{{ op.id|e }}-{{ op.name|e }}" value="{{ op.id|e }}">{{ op.name|e }} - -->
-<!--                                        {{ op.start|e }}-->
-<!--                                    </option>-->
-<!--                                    {% endif %}-->
-<!--                                    {% endfor %}-->
+                                    <template x-for="op in operations">
+                                        <option :key="op.id" :id="op.id-op.name" :value="op.id" x-text="`${op.name} - ${op.start}`"></option>
+                                    </template>
                                 </select>
                                 <div class="p-1">
                                     <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">
@@ -57,15 +51,12 @@
     <template x-if="isAddModalOpen">
         <div class="modal is-active">
             <div class="modal-background"></div>
-            <form class="m-1">
+            <form class="m-1" id="opForm">
                 <div class="modal-card">
                     <header class="modal-card-head">
                         <p class="modal-card-title">Start New Operation</p>
                     </header>
                     <section class="modal-card-body">
-                        <template x-for="item in currentOperation">
-                            <p x-text="item"></p>
-                        </template>
                         <label for="op-name">Operation name</label>
                         <input id="op-name" type="text" x-model="currentOperation.name"
                                x-effect="editOperationField('name', $el.value)" required>
@@ -79,8 +70,8 @@
                                     <option value="{{ g|e }}">{{ g|e }}</option>
                                     {% endfor %}
                                 </select>
-                                <select x-model="currentOperation.adversary"
-                                        x-effect="editOperationField('adversary', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.adversary_id"
+                                        x-effect="editOperationField('adversary_id', $el.selectedOptions[0].value)">
                                     <option value="" selected>No adversary (manual)</option>
                                     {% for adv in adversaries %}
                                     {% if adv.has_repeatable_abilities %}
@@ -95,13 +86,13 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-model="currentOperation.autoClose"
-                                        x-effect="editOperationField('autoClose', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.auto_close"
+                                        x-effect="editOperationField('auto_close', $el.selectedOptions[0].value)">
                                     <option value="0" selected>Keep open forever</option>
                                     <option value="1">Auto close operation</option>
                                 </select>
-                                <select x-model="currentOperation.run"
-                                        x-effect="editOperationField('run', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.state"
+                                        x-effect="editOperationField('state', $el.selectedOptions[0].value)">
                                     <option value="running" selected>Run immediately</option>
                                     <option value="paused">Pause on start</option>
                                 </select>
@@ -140,8 +131,8 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
-                                <select x-model="currentOperation.parsers"
-                                        x-effect="editOperationField('parsers', $el.selectedOptions[0].value)">
+                                <select x-model="currentOperation.use_learning_parsers"
+                                        x-effect="editOperationField('use_learning_parsers', $el.selectedOptions[0].value)">
                                     <option value="1" selected>Use default parsers</option>
                                     <option value="0">Do not use default parsers</option>
                                 </select>
@@ -181,17 +172,17 @@
                         <div>
                             <div class="m-1">
                                 <label class="heading pt-2" for="schedule-time">Schedule operation</label>
-                                <input x-model="currentOperation.schedule"
-                                       x-effect="editOperationField('schedule', $el.value)" type="time"
+                                <input x-model="schedule"
+                                       x-effect="schedule = $el.value" type="time"
                                        id="schedule-time" value="00:00">
                             </div>
                         </div>
                     </section>
                     <footer class="modal-card-foot">
                         <!--                    TODO when user clicks on add operation it should show on view screen-->
-                        <!--                    TODO add tooltip for scheduling &#45;&#45; user must set AM/PM along with numerical time value in order for schedule to work-->
+                        <!--                    TODO add tooltip for scheduling, user must set AM/PM along with numerical time value in order for schedule to work-->
                         <button class="button is-primary is-small" x-on:click="handleStartOperation"
-                                x-text="currentOperation.schedule ? 'Schedule' : 'Start'"></button>
+                                x-text="schedule ? 'Schedule' : 'Start'"></button>
                         <button class="button is-small" x-on:click="isAddModalOpen = false">Cancel</button>
                     </footer>
                 </div>
@@ -201,39 +192,45 @@
 </div>
 
 <script>
-    let loadedOperations = {{ operations | tojson }}
     function alpineOperations() {
         return {
             toast: '',
             selectedOperation: null,
             isAgentOutputSelected: false,
             isAddModalOpen: false,
-            operations: loadedOperations,
+            operations: [],
             currentOperation: {
+                index: "operations",
                 name: "",
                 group: "",
-                adversary: "",
-                autoClose: "",
-                run: "",
+                adversary_id: "",
+                auto_close: "",
+                state: "",
                 autonomous: "",
                 planner: "",
                 source: "",
-                parsers: "",
+                use_learning_parsers: "",
                 timeout: "",
                 obfuscator: "",
                 jitter: "",
                 visibility: "",
-                schedule: "",
+            },
+            schedule: "",
+
+            getOperations() {
+                restRequest('POST', {'index':'operations'}, (data) => {
+                    this.operations = JSON.parse(data);
+                    console.log('OPS RECEIVED', data, this.operations);
+                });
             },
 
             editOperationField(fieldName, newValue) {
                 if (fieldName === 'jitter') {
-                    console.log('CURRENT VAL', newValue)
                     if (!newValue.includes('/')) return;
                     let [jitterMin, jitterMax] = newValue.split("/");
                     jitterMin = parseInt(jitterMin);
                     jitterMax = parseInt(jitterMax);
-                    console.log('JITTERBUG', newValue, 'min', jitterMin, 'max', jitterMax, !jitterMin, !jitterMax)
+
                     if (jitterMin < 0 || jitterMax < 0) {
                         toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
                         return;
@@ -246,8 +243,7 @@
                 if (this.currentOperation[fieldName] !== null) {
                     this.currentOperation[fieldName] = newValue;
                 }
-                console.log('NEW OPERATION', fieldName, newValue, this.currentOperation);
-                console.log('LOADEDOPS0', this.operations)
+                console.log('LOADED OPS', this.operations);
             },
 
             handleStartOperation() {
@@ -256,32 +252,31 @@
                 }
                 if (!this.currentOperation.name) {
                     toast('Error: Operation name field is empty.');
-                    return;
-                } else if (this.currentOperation.schedule) {
+                } else if (this.schedule) {
+                    const time = this.schedule.split(":");
                     restRequest('PUT', {
                         'index': 'schedule',
                         'operation': this.currentOperation,
-                        'schedule': {'hour': parseInt(time.split(":")[0]), 'minute': parseInt(time.split(":")[1])}
+                        'schedule': {'hour': parseInt(time[0]), 'minute': parseInt(time[1])}
                     });
+                    this.isAddModalOpen = false;
                     toast('Scheduled operation ' + this.currentOperation.name + "!");
                 } else {
                     restRequest('PUT', this.currentOperation, () => {
-                        toast('Notice that you can pause or stop the operation at any time.');
-                        toast('Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.');
-                        this.operations.push(this.currentOperation);
+                        toast('Notice that you can pause or stop the operation at any time. Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.');
+                        // this.resetCurrentOperation();
+                        this.getOperations();
+                        document.getElementById('opForm').reset();
                     });
                     toast('Started operation ' + this.currentOperation.name + "!");
+                    this.isAddModalOpen = false;
                 }
-                this.isAddModalOpen = false;
             },
 
             resetCurrentOperation() {
-                console.log('CURR', this.currentOperation);
                 for (const field in this.currentOperation) {
-                    console.log('FIEDL', field);
-                    this.currentOperation[field] = "";
+                    if (field !== 'index') this.currentOperation[field] = "";
                 }
-                console.log('CURR NOW', this.currentOperation);
             }
 
         }
