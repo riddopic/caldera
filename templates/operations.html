@@ -14,7 +14,7 @@
                         <label class="label">Choose an operation to view:</label>
                         <div class="control">
                             <div class="select">
-                                <select id="operation-select" x-on:change="loadPlanner()" x-model="selectedOperation">
+                                <select id="operation-select" x-on:change="loadOperation()" x-model="selectedOperation">
                                     <!--                                    TODO deprecate disabled and make errors-->
                                     <option value="" default selected>Select an existing operation</option>
                                     <template x-for="op in operations">
@@ -46,12 +46,21 @@
                 </div>
             </div>
         </div>
+
+        <div class="console-panel">
+            <template x-for="item in selectedOperation">
+                <p x-text="item"></p>
+                <template x-for="items in item">
+                    <span x-text="items"></span>
+                </template>
+            </template>
+        </div>
     </div>
 
     <template x-if="isAddModalOpen">
         <div class="modal is-active">
             <div class="modal-background"></div>
-            <form class="m-1" id="opForm">
+            <form class="m-1">
                 <div class="modal-card">
                     <header class="modal-card-head">
                         <p class="modal-card-title">Start New Operation</p>
@@ -192,6 +201,7 @@
 </div>
 
 <script>
+    const endpoint = '/api/v2/operations';
     function alpineOperations() {
         return {
             toast: '',
@@ -218,10 +228,10 @@
             schedule: "",
 
             getOperations() {
-                restRequest('POST', {'index':'operations'}, (data) => {
-                    this.operations = JSON.parse(data);
-                    console.log('OPS RECEIVED', data, this.operations);
-                });
+                restRequest('GET', {}, (res) => {
+                    this.operations = JSON.parse(res);
+                    console.log('OPS RECEIVED', res, this.operations);
+                }, endpoint);
             },
 
             editOperationField(fieldName, newValue) {
@@ -263,9 +273,11 @@
                 } else {
                     restRequest('PUT', this.currentOperation, () => {
                         toast('Notice that you can pause or stop the operation at any time. Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.', true);
+                        // TODO if the v2 PUT request returns a new operation id, set this to the ID
+                        // if not, then set it to latest item in this.operations[]
+                        // this.selectedOperation = this.currentOperation;
                         this.resetCurrentOperation();
                         this.getOperations();
-                        document.getElementById('opForm').reset();
                     });
                     toast('Started operation ' + this.currentOperation.name + "!", true);
                     this.isAddModalOpen = false;
@@ -276,8 +288,15 @@
                 for (const field in this.currentOperation) {
                     if (field !== 'index') this.currentOperation[field] = "";
                 }
-            }
+            },
 
+            loadOperation() {
+                console.log('selected op', this.selectedOperation);
+                restRequest('GET', {}, (res) => {
+                    this.selectedOperation = JSON.parse(res);
+                    console.log('OPS RECEIVED', res, this.selectedOperation);
+                }, endpoint+'/'+this.selectedOperation);
+            }
         }
     }
 </script>
@@ -285,6 +304,12 @@
 <style>
     .column {
         margin: 0;
+    }
+
+    .console-panel {
+        background-color: black;
+        border-radius: 5px;
+        padding: 1.3rem;
     }
 
     /*input:invalid:required::after {*/
