@@ -49,28 +49,35 @@
             </div>
         </div>
 
-        <div class="add-buttons">
-            <button class="button is-primary" x-on:click="openModal = 'addCommand'">+ Add manual command</button>
-            <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
-        </div>
-        <div class="code-panel">
-            <h2 x-text="selectedOperation.name"></h2>
-            <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
-            <template x-if="selectedOperation.chain">
-                <ul>
-                    <template x-for="link in selectedOperation.chain">
-                        <li>
-                            <span x-text="'agent#'+link.paw"></span>
-                            <span x-text="link.ability.name"></span>
-                            <span x-text="link.decide"></span>
-                            <span x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></span>
-                        </li>
+        <template x-if="selectedOperation">
+            <div>
+                <div class="add-buttons">
+                    <button class="button is-primary" x-on:click="openModal = 'addCommand'">+ Add manual command
+                    </button>
+                    <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
+                </div>
+                <div class="code-panel">
+                    <h2 x-text="selectedOperation.name"></h2>
+                    <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
+                    <template x-if="selectedOperation.chain">
+                        <ul>
+                            <template x-for="link in selectedOperation.chain">
+                                <li>
+                                    <span x-text="'agent#'+link.paw"></span>
+                                    <span x-text="link.ability.name"></span>
+                                    <span x-text="link.decide"></span>
+                                    <span x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></span>
+                                </li>
+                            </template>
+                        </ul>
                     </template>
-                </ul>
-            </template>
-        </div>
+                </div>
+            </div>
+        </template>
     </div>
 
+
+    <!--    MODALS      -->
     <template x-if="openModal">
         <div class="modal is-active">
             <div class="modal-background"></div>
@@ -217,21 +224,22 @@
                                 <p class="modal-card-title">Add New Manual Command</p>
                             </header>
                             <section class="modal-card-body">
-                                <select x-model="selectedAgentIndex">
-                                    <option default>Choose an agent...</option>
+                                <label for="manual-agent">Choose an agent:</label>
+                                <select id="manual-agent" x-model="selectedAgentIndex">
+                                    <option default>none selected</option>
                                     <template x-for="(agent, index) in selectedOperation.host_group">
                                         <option :value="index" x-text="agent.display_name + '-' + agent.paw"></option>
                                     </template>
                                 </select>
-                                <label for="input-command">Type manual command:</label>
                                 <template x-if="selectedOperation.host_group[selectedAgentIndex]">
                                     <div>
-                                        <select x-model="manualCommand.executor">
+                                        <label for="input-command">Type manual command:</label>
+                                        <select x-model="manualCommand.executor" id="manual-executor">
                                             <template x-for="executor in selectedOperation.host_group[selectedAgentIndex].executors">
                                                 <option x-text="executor"></option>
                                             </template>
                                         </select>
-                                        <input id="input-command">
+                                        <input x-model="manualCommand.command" id="input-command" type="text" required placeholder="Echo 'Hello World!'">
                                     </div>
                                 </template>
                             </section>
@@ -385,13 +393,16 @@
             },
 
             handleManualCommand() {
-                this.manualCommand.operation = this.selectedOperationID;
                 this.manualCommand.agent = this.selectedOperation.host_group[this.selectedAgentIndex].paw;
-                console.log('THIS SELECTED AGENT', this.selectedAgentIndex)
-                // restRequest('PUT', this.manualCommand, () => {
-                //     toast('Added manual command.', true);
-                //     this.openModal = null;
-                // })
+                this.manualCommand.operation = this.selectedOperationID;
+                this.manualCommand.executor = document.getElementById('manual-executor').selectedOptions[0].value;
+                restRequest('PUT', this.manualCommand, (data) => {
+                    data = JSON.parse(data);
+                    this.openModal = null;
+                    if (data['error']) toast('Error: ' + data['error']);
+                    else toast('Added manual command.', true);
+                    this.resetObject(this.manualCommand)
+                })
             },
 
             handlePotentialLink() {
