@@ -252,27 +252,33 @@
                                 <p class="modal-card-title">Add New Potential Link</p>
                             </header>
                             <section class="modal-card-body">
-                                <select>
-                                    <option default>Choose an agent...</option>
-                                    <template x-for="agent in selectedOperation.host_group">
-                                        <option x-text="agent.display_name + '-' + agent.paw"></option>
+                                <select x-model="selectedAgentIndex" x-on:change="getAgentLinks()">
+                                    <option default value="">Choose an agent...</option>
+                                    <template x-for="(agent, index) in selectedOperation.host_group">
+                                        <option :value="index" x-text="agent.display_name + '-' + agent.paw"></option>
                                     </template>
                                 </select>
 
-                                <select>
-                                    <option default>Choose a tactic...</option>
-                                    <template x-for="agent in selectedOperation.host_group">
-                                        <option x-text="agent.display_name + '-' + agent.paw"></option>
+                                <select x-model="potentialLink.tactic" x-on:change="filterAbilities()">
+                                    <option default value="">Choose a tactic...</option>
+                                    <template x-for="tactic in tacticFiltersList">
+                                        <option x-text="tactic"></option>
                                     </template>
                                 </select>
 
-                                <select>
+                                <select x-model="potentialLink.technique" x-on:change="filterAbilities()">
                                     <option default>Choose a technique...</option>
-                                    <template x-for="agent in selectedOperation.host_group">
-                                        <option x-text="agent.display_name + '-' + agent.paw"></option>
+                                    <template x-for="technique in techniqueFiltersList">
+                                        <option x-text="technique"></option>
                                     </template>
                                 </select>
                             </section>
+                            <div>
+                                <template x-for="link in filteredLinksList">
+                                    <p x-text="link.ability.name"></p>
+                                </template>
+                                <template x-if="!filteredLinksList"><p>Building potential links...</p></template>
+                            </div>
                         </div>
                     </template>
 
@@ -333,6 +339,14 @@
                 executor: "",
                 command: ""
             },
+            potentialLink: {
+                agent: "",
+                tactic: "",
+                technique: "",
+            },
+            tacticFiltersList: [],
+            techniqueFiltersList: [],
+            filteredLinksList: [],
             schedule: "",
 
             getOperations() {
@@ -406,6 +420,10 @@
             },
 
             handlePotentialLink() {
+                restRequest('POST', {"index": "link", "op_id": this.selectedOperationID, "paw": this.selectedOperation.host_group[this.selectedAgentIndex].paw}, (data) => {
+                    console.log('handlePotentialLink fetchlinks callback data:', data);
+
+                }, '/api/rest');
             },
 
             resetObject(obj = {}) {
@@ -427,7 +445,7 @@
 
             renderOperation(op) {
                 console.log('received', op.chain)
-                // TODO remove this force chain object
+                // TODO remove this force push chain object
                 op.chain.push({
                     "status": 0,
                     "facts": [],
@@ -503,6 +521,28 @@
                 console.log('this op', this.selectedOperation)
                 if (op.chain) {
                 }
+            },
+
+            getAgentLinks() {
+                this.potentialLink.agent = this.selectedOperation.host_group[this.selectedAgentIndex];
+                console.log('getAgentLinks called', this.selectedAgentIndex, this.potentialLink);
+                this.tacticFiltersList = [];
+                this.techniqueFiltersList = [];
+                this.potentialLink.agent.links.forEach((link) => {
+                    this.tacticFiltersList.push(link.ability.tactic);
+                    this.techniqueFiltersList.push(link.ability.technique_name);
+                });
+                this.filteredLinksList = this.potentialLink.agent.links;
+            },
+
+            filterAbilities() {
+                console.log('filterAbilities called', this.potentialLink);
+                this.filteredLinksList = this.potentialLink.agent.links.filter((link) => {
+                    let match = true;
+                    if (this.potentialLink.tactic) match = this.potentialLink.tactic === link.ability.tactic;
+                    if (this.potentialLink.technique) match = this.potentialLink.technique === link.ability.technique_name;
+                    return match;
+                })
             }
         }
     }
