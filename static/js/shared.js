@@ -14,6 +14,15 @@ function restRequest(requestType, data, callback = (r) => {
         .catch((error) => console.error(error));
 }
 
+function sortAlphabetically(list) {
+    return list.sort((a, b) => {
+        let x = a.toLowerCase(), y = b.toLowerCase();
+        if (x < y) return -1;
+        else if (x > y) return 1;
+        else return 0;
+    })
+}
+
 function downloadReport(endpoint, filename, data = {}) {
     function downloadObjectAsJson(data) {
         stream('Downloading report: ' + filename);
