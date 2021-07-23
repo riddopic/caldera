@@ -14,7 +14,7 @@
                         <label class="label">Choose an operation to view:</label>
                         <div class="control">
                             <div class="select">
-                                <select id="operation-select" x-on:change="loadOperation()"
+                                <select id="operation-select" x-on:change="getOperation()"
                                         x-model="selectedOperationID">
                                     <!--                                    TODO deprecate disabled and make errors-->
                                     <option value="" default selected>Select an existing operation</option>
@@ -98,9 +98,9 @@
                                         <select x-model="startOperation.group"
                                                 x-effect="editOperationField('group', $el.selectedOptions[0].value)">
                                             <option value="" selected>Use all groups</option>
-                                            {% for g in groups %}
-                                            <option value="{{ g|e }}">{{ g|e }}</option>
-                                            {% endfor %}
+                                                <template x-for="group in agentGroups">
+                                                    <option x-text="group"></option>
+                                                </template>
                                         </select>
                                         <select x-model="startOperation.adversary_id"
                                                 x-effect="editOperationField('adversary_id', $el.selectedOptions[0].value)">
@@ -235,11 +235,13 @@
                                     <div>
                                         <label for="input-command">Type manual command:</label>
                                         <select x-model="manualCommand.executor" id="manual-executor">
-                                            <template x-for="executor in selectedOperation.host_group[selectedAgentIndex].executors">
+                                            <template
+                                                    x-for="executor in selectedOperation.host_group[selectedAgentIndex].executors">
                                                 <option x-text="executor"></option>
                                             </template>
                                         </select>
-                                        <input x-model="manualCommand.command" id="input-command" type="text" required placeholder="Echo 'Hello World!'">
+                                        <input x-model="manualCommand.command" id="input-command" type="text" required
+                                               placeholder="Echo 'Hello World!'">
                                     </div>
                                 </template>
                             </section>
@@ -274,8 +276,18 @@
                                 </select>
                             </section>
                             <div>
-                                <template x-for="link in filteredLinksList">
-                                    <p x-text="link.ability.name"></p>
+                                <p x-text="filteredLinksList.length + ' potential link' + ((filteredLinksList.length === 1) ? '' : 's')"></p>
+                                <template x-if="filteredLinksList">
+                                    <ul>
+                                        <template x-for="link in filteredLinksList">
+                                            <li>
+                                                <p x-text="link.ability.name"></p>
+                                                <button class="button is-primary is-small" x-on:click="addLink(link)">
+                                                    Add Link
+                                                </button>
+                                            </li>
+                                        </template>
+                                    </ul>
                                 </template>
                                 <template x-if="!filteredLinksList"><p>Building potential links...</p></template>
                             </div>
@@ -305,11 +317,11 @@
 
 <script>
     const endpoint = '/api/v2/operations';
-    const oldEnpoint = '/api/rest';
 
     function alpineOperations() {
         return {
             toast: '',
+            agentGroups: `{{ groups | tojson }}`.toString().replace(/["\[\]]/g, '').split(','),
             selectedOperationID: null,
             selectedOperation: null,
             selectedAgentIndex: null,
@@ -349,32 +361,32 @@
             filteredLinksList: [],
             schedule: "",
 
+            get selectedAgent() {
+                return this.selectedOperation?.host_group[this.selectedAgentIndex];
+            },
+
+            //
+            // API CALLS
+            //
+
             getOperations() {
                 restRequest('GET', {}, (res) => {
                     this.operations = JSON.parse(res);
-                    console.log('OPS RECEIVED', res, this.operations);
                 }, endpoint);
             },
 
-            editOperationField(fieldName, newValue) {
-                if (fieldName === 'jitter') {
-                    if (!newValue.includes('/')) return;
-                    let [jitterMin, jitterMax] = newValue.split("/");
-                    jitterMin = parseInt(jitterMin);
-                    jitterMax = parseInt(jitterMax);
+            getOperation() {
+                console.log('selected op', this.selectedOperationID);
+                restRequest('GET', {}, (res) => {
+                    this.selectedOperation = JSON.parse(res);
+                    // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
+                }, endpoint + '/' + this.selectedOperationID);
+            },
 
-                    if (jitterMin < 0 || jitterMax < 0) {
-                        toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
-                        return;
-                    }
-                    if (jitterMin >= jitterMax) {
-                        toast('Error: Jitter MIN must be less than the jitter MAX.');
-                        return;
-                    }
-                }
-                if (this.startOperation[fieldName] !== null) {
-                    this.startOperation[fieldName] = newValue;
-                }
+            getAgents() {
+                restRequest('POST', {'index': 'agents'}, (data) => {
+                    this.updateAgentGroups(JSON.parse(data));
+                });
             },
 
             handleStartOperation() {
@@ -407,7 +419,12 @@
             },
 
             handleManualCommand() {
-                this.manualCommand.agent = this.selectedOperation.host_group[this.selectedAgentIndex].paw;
+                if (!this.manualCommand.command) {
+                    toast('Enter manual command.');
+                    return;
+                }
+                this.manualCommand.agent = this.selectedAgent.paw;
+                console.log('MEOW', this.manualCommand.agent, this.selectedAgent)
                 this.manualCommand.operation = this.selectedOperationID;
                 this.manualCommand.executor = document.getElementById('manual-executor').selectedOptions[0].value;
                 restRequest('PUT', this.manualCommand, (data) => {
@@ -420,11 +437,43 @@
             },
 
             handlePotentialLink() {
-                restRequest('POST', {"index": "link", "op_id": this.selectedOperationID, "paw": this.selectedOperation.host_group[this.selectedAgentIndex].paw}, (data) => {
-                    console.log('handlePotentialLink fetchlinks callback data:', data);
+                // TODO since add link button for each ability in modal does all the REST work,
+                // not sure if this should do much else besides closing the modal,
+                // which makes it the same as the Cancel button?
 
+                this.openModal = null;
+                // restRequest('POST', {
+                //     "index": "link",
+                //     "op_id": this.selectedOperationID,
+                //     "paw": this.selectedAgent.paw
+                // }, (data) => {
+                //     console.log('handlePotentialLink fetchlinks callback data:', data);
+                // }, '/api/rest');
+            },
+
+            getAgentLinks() {
+                this.potentialLink.agent = this.selectedAgent;
+                this.tacticFiltersList = [];
+                this.techniqueFiltersList = [];
+                this.potentialLink.agent.links.forEach((link) => {
+                    this.tacticFiltersList.push(link.ability.tactic);
+                    this.techniqueFiltersList.push(link.ability.technique_name);
+                });
+                this.tacticFiltersList = sortAlphabetically(this.tacticFiltersList);
+                this.techniqueFiltersList = sortAlphabetically(this.techniqueFiltersList);
+                this.filteredLinksList = this.potentialLink.agent.links;
+            },
+
+            addLink(link) {
+                restRequest('PUT', {...link, index: "link"}, () => {
+                    this.getOperations();
+                    this.getAgents();
                 }, '/api/rest');
             },
+
+            //
+            // OBJECT MANIPULATION
+            //
 
             resetObject(obj = {}) {
                 for (const field in obj) {
@@ -432,107 +481,33 @@
                 }
             },
 
-            loadOperation() {
-                console.log('selected op', this.selectedOperationID);
-                restRequest('GET', {}, (res) => {
-                    this.selectedOperation = JSON.parse(res);
-                    this.renderOperation(this.selectedOperation);
-
-                    console.log('OPS RECEIVED', res, this.selectedOperation);
-                    toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
-                }, endpoint + '/' + this.selectedOperationID);
-            },
-
-            renderOperation(op) {
-                console.log('received', op.chain)
-                // TODO remove this force push chain object
-                op.chain.push({
-                    "status": 0,
-                    "facts": [],
-                    "paw": "izdchp",
-                    "visibility": {
-                        "adjustments": [],
-                        "score": 50
-                    },
-                    "output": "True",
-                    "ability": {
-                        "name": "Manual Command",
-                        "ability_id": "e518d4e2-621d-4289-98c5-bf086d9d738b",
-                        "repeatable": false,
-                        "description": "Manual command ability",
-                        "technique_id": "auto-generated",
-                        "privilege": null,
-                        "additional_info": {},
-                        "singleton": false,
-                        "requirements": [],
-                        "buckets": [],
-                        "tactic": "auto-generated",
-                        "technique_name": "auto-generated",
-                        "executors": [
-                            {
-                                "code": null,
-                                "command": "echo \"hi\"",
-                                "name": "sh",
-                                "variations": [],
-                                "language": null,
-                                "timeout": 60,
-                                "parsers": [],
-                                "additional_info": {},
-                                "uploads": [],
-                                "build_target": null,
-                                "cleanup": [],
-                                "payloads": [],
-                                "platform": "darwin"
-                            }
-                        ],
-                        "access": {}
-                    },
-                    "finish": "2021-07-21 10:28:19",
-                    "cleanup": 0,
-                    "collect": "2021-07-21 10:28:19",
-                    "pin": 0,
-                    "decide": "2021-07-21 10:28:10",
-                    "unique": "56ce1be2-4b90-4bdc-b1ee-868cda392b0e",
-                    "relationships": [],
-                    "pid": "90193",
-                    "used": [],
-                    "deadman": false,
-                    "command": "ZWNobyAiaGki",
-                    "score": 0,
-                    "id": "56ce1be2-4b90-4bdc-b1ee-868cda392b0e",
-                    "executor": {
-                        "code": null,
-                        "command": "echo \"hi\"",
-                        "name": "sh",
-                        "variations": [],
-                        "language": null,
-                        "timeout": 60,
-                        "parsers": [],
-                        "additional_info": {},
-                        "uploads": [],
-                        "build_target": null,
-                        "cleanup": [],
-                        "payloads": [],
-                        "platform": "darwin"
-                    },
-                    "host": "MM271415-PC"
-                })
-                // this.selectedOperation = op;
-                console.log('this op', this.selectedOperation)
-                if (op.chain) {
+            updateAgentGroups(agents) {
+                if (agents) {
+                    agents.forEach((agent) => {
+                        if (!this.agentGroups.includes(agent.group)) this.agentGroups.push(agent.group);
+                    })
                 }
             },
 
-            getAgentLinks() {
-                this.potentialLink.agent = this.selectedOperation.host_group[this.selectedAgentIndex];
-                console.log('getAgentLinks called', this.selectedAgentIndex, this.potentialLink);
-                this.tacticFiltersList = [];
-                this.techniqueFiltersList = [];
-                this.potentialLink.agent.links.forEach((link) => {
-                    this.tacticFiltersList.push(link.ability.tactic);
-                    this.techniqueFiltersList.push(link.ability.technique_name);
-                });
-                this.filteredLinksList = this.potentialLink.agent.links;
+            editOperationField(fieldName, newValue) {
+                if (fieldName === 'jitter') {
+                    if (!newValue.includes('/')) return;
+                    let [jitterMin, jitterMax] = newValue.split("/");
+                    jitterMin = parseInt(jitterMin);
+                    jitterMax = parseInt(jitterMax);
+
+                    if (jitterMin < 0 || jitterMax < 0) {
+                        toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
+                        return;
+                    }
+                    if (jitterMin >= jitterMax) {
+                        toast('Error: Jitter MIN must be less than the jitter MAX.');
+                        return;
+                    }
+                }
+                if (this.startOperation[fieldName] !== null) {
+                    this.startOperation[fieldName] = newValue;
+                }
             },
 
             filterAbilities() {
@@ -543,7 +518,8 @@
                     if (this.potentialLink.technique) match = this.potentialLink.technique === link.ability.technique_name;
                     return match;
                 })
-            }
+            },
+
         }
     }
 </script>
