@@ -231,12 +231,12 @@
                                         <option :value="index" x-text="agent.display_name + '-' + agent.paw"></option>
                                     </template>
                                 </select>
-                                <template x-if="selectedOperation.host_group[selectedAgentIndex]">
+                                <template x-if="selectedAgent">
                                     <div>
                                         <label for="input-command">Type manual command:</label>
                                         <select x-model="manualCommand.executor" id="manual-executor">
                                             <template
-                                                    x-for="executor in selectedOperation.host_group[selectedAgentIndex].executors">
+                                                    x-for="executor in selectedAgent.executors">
                                                 <option x-text="executor"></option>
                                             </template>
                                         </select>
@@ -424,7 +424,6 @@
                     return;
                 }
                 this.manualCommand.agent = this.selectedAgent.paw;
-                console.log('MEOW', this.manualCommand.agent, this.selectedAgent)
                 this.manualCommand.operation = this.selectedOperationID;
                 this.manualCommand.executor = document.getElementById('manual-executor').selectedOptions[0].value;
                 restRequest('PUT', this.manualCommand, (data) => {
