@@ -91,19 +91,19 @@
                             <section class="modal-card-body">
                                 <label for="op-name">Operation name</label>
                                 <input class="input" id="op-name" type="text" x-model="startOperation.name"
-                                       x-effect="editOperationField('name', $el.value)" required>
+                                       x-effect="updateObject('name', $el.value)" required>
                                 <div>
                                     <p class="heading pt-2">Basic options</p>
                                     <div class="m-1">
                                         <select x-model="startOperation.group"
-                                                x-effect="editOperationField('group', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('group', $el.selectedOptions[0].value)">
                                             <option value="" selected>Use all groups</option>
-                                                <template x-for="group in agentGroups">
-                                                    <option x-text="group"></option>
-                                                </template>
+                                            <template x-for="group in agentGroups">
+                                                <option x-text="group"></option>
+                                            </template>
                                         </select>
                                         <select x-model="startOperation.adversary_id"
-                                                x-effect="editOperationField('adversary_id', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('adversary_id', $el.selectedOptions[0].value)">
                                             <option value="" selected>No adversary (manual)</option>
                                             {% for adv in adversaries %}
                                             {% if adv.has_repeatable_abilities %}
@@ -120,12 +120,12 @@
                                             {% endfor %}
                                         </select>
                                         <select x-model="startOperation.auto_close"
-                                                x-effect="editOperationField('auto_close', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('auto_close', $el.selectedOptions[0].value)">
                                             <option value="0" selected>Keep open forever</option>
                                             <option value="1">Auto close operation</option>
                                         </select>
                                         <select x-model="startOperation.state"
-                                                x-effect="editOperationField('state', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('state', $el.selectedOptions[0].value)">
                                             <option value="running" selected>Run immediately</option>
                                             <option value="paused">Pause on start</option>
                                         </select>
@@ -135,12 +135,12 @@
                                     <p class="heading pt-2">Autonomous</p>
                                     <div class="m-1">
                                         <select x-model="startOperation.autonomous"
-                                                x-effect="editOperationField('autonomous', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('autonomous', $el.selectedOptions[0].value)">
                                             <option value="1" selected>Run autonomously</option>
                                             <option value="0">Require manual approval</option>
                                         </select>
                                         <select x-model="startOperation.planner"
-                                                x-effect="editOperationField('planner', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('planner', $el.selectedOptions[0].value)">
                                             {% for p in planners %}
                                             {% if p.name == "atomic" %}
                                             <option value="{{ p.name|e }}" selected>Use {{ p.name|e }} planner</option>
@@ -157,7 +157,7 @@
                                             {% endfor %}
                                         </select>
                                         <select x-model="startOperation.source"
-                                                x-effect="editOperationField('source', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('source', $el.selectedOptions[0].value)">
                                             {% for s in sources %}
                                             {% if loop.first %}
                                             <option value="{{ s.name|e }}" selected>Use {{ s.name|e }} facts</option>
@@ -167,13 +167,13 @@
                                             {% endfor %}
                                         </select>
                                         <select x-model="startOperation.use_learning_parsers"
-                                                x-effect="editOperationField('use_learning_parsers', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('use_learning_parsers', $el.selectedOptions[0].value)">
                                             <option value="1" selected>Use default parsers</option>
                                             <option value="0">Do not use default parsers</option>
                                         </select>
                                         <label class="heading pt-2" for="queueTimeout">Cleanup Timeout (secs)</label>
                                         <input class="input" x-model="startOperation.timeout"
-                                               x-effect="editOperationField('timeout', $el.value)" id="queueTimeout"
+                                               x-effect="updateObject('timeout', $el.value)" id="queueTimeout"
                                                type="number" placeholder="30" value="30" min="0" max="300"
                                                onchange="stream('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
                                     </div>
@@ -182,7 +182,7 @@
                                     <p class="heading pt-2">Stealth</p>
                                     <div class="m-1">
                                         <select x-model="startOperation.obfuscator"
-                                                x-effect="editOperationField('obfuscator', $el.selectedOptions[0].value)">
+                                                x-effect="updateObject('obfuscator', $el.selectedOptions[0].value)">
                                             {% for o in obfuscators %}
                                             {% if loop.first %}
                                             <option value="{{ o.name|e }}" selected>{{ o.name|e }} obfuscation</option>
@@ -194,12 +194,12 @@
                                         <label class="heading pt-2" for="queueJitter" required>Jitter (min/max)
                                             sec</label>
                                         <input class="input" x-model="startOperation.jitter"
-                                               x-effect="editOperationField('jitter', $el.value)"
+                                               x-effect="updateObject('jitter', $el.value)"
                                                id="queueJitter" value="4/8" type="text" pattern="[0-9\/0-9]*"
                                                placeholder="4/8"/>
                                         <label class="heading pt-2" for="queueVisibility">Adjust visibility: </label>
                                         <input x-model="startOperation.visibility"
-                                               x-effect="editOperationField('visibility', $el.value)"
+                                               x-effect="updateObject('visibility', $el.value)"
                                                id="queueVisibility"
                                                type="range" value="50" min="1" max="100"
                                                onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
@@ -235,9 +235,8 @@
                                     <div>
                                         <label for="input-command">Type manual command:</label>
                                         <select x-model="manualCommand.executor" id="manual-executor">
-                                            <template
-                                                    x-for="executor in selectedAgent.executors">
-                                                <option x-text="executor"></option>
+                                            <template x-for="(executor, index) in selectedAgentExecutors">
+                                                <option x-text="executor" :value="selectedAgent.executors[index]" x-bind:selected="index === 0"></option>
                                             </template>
                                         </select>
                                         <input x-model="manualCommand.command" id="input-command" type="text" required
@@ -301,13 +300,13 @@
                             <button class="button is-primary is-small" x-on:click="handleStartOperation"
                                     x-text="schedule ? 'Schedule' : 'Start'"></button>
                         </template>
-                        <template x-if="openModal !== 'addOperation'">
+                        <template x-if="openModal === 'addCommand'">
                             <button class="button is-primary is-small"
-                                    x-on:click="() => { if (openModal === 'addCommand') handleManualCommand(); else handlePotentialLink()}">
+                                    x-on:click="handleManualCommand">
                                 Save
                             </button>
                         </template>
-                        <button class="button is-small" x-on:click="openModal = null">Cancel</button>
+                        <button class="button is-small" x-on:click="openModal = null"  x-text="openModal === 'addLink' ? 'Close' : 'Cancel'">Cancel</button>
                     </footer>
                 </div>
             </form>
@@ -317,10 +316,14 @@
 
 <script>
     const endpoint = '/api/v2/operations';
+    const executorShells = {
+        psh: 'PS >',
+        cmd: '>',
+        sh: '$'
+    };
 
     function alpineOperations() {
         return {
-            toast: '',
             agentGroups: `{{ groups | tojson }}`.toString().replace(/["\[\]]/g, '').split(','),
             selectedOperationID: null,
             selectedOperation: null,
@@ -363,6 +366,11 @@
 
             get selectedAgent() {
                 return this.selectedOperation?.host_group[this.selectedAgentIndex];
+            },
+
+            get selectedAgentExecutors() {
+                if (this.selectedAgent) return this.selectedAgent.executors.map(e => executorShells[e]);
+                else return [];
             },
 
             //
@@ -435,12 +443,7 @@
                 })
             },
 
-            handlePotentialLink() {
-                // TODO since add link button for each ability in modal does all the REST work,
-                // not sure if this should do much else besides closing the modal,
-                // which makes it the same as the Cancel button?
-
-                this.openModal = null;
+            handlePotentialLink() { this.openModal = null;
                 // restRequest('POST', {
                 //     "index": "link",
                 //     "op_id": this.selectedOperationID,
@@ -488,8 +491,8 @@
                 }
             },
 
-            editOperationField(fieldName, newValue) {
-                if (fieldName === 'jitter') {
+            updateObject(fieldName, newValue, obj = this.startOperation) {
+                if (obj === this.startOperation && fieldName === 'jitter') {
                     if (!newValue.includes('/')) return;
                     let [jitterMin, jitterMax] = newValue.split("/");
                     jitterMin = parseInt(jitterMin);
@@ -504,8 +507,8 @@
                         return;
                     }
                 }
-                if (this.startOperation[fieldName] !== null) {
-                    this.startOperation[fieldName] = newValue;
+                if (obj[fieldName] !== null) {
+                    obj[fieldName] = newValue;
                 }
             },
 
