@@ -56,15 +56,21 @@
                     </button>
                     <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
                 </div>
-                <div class="controls-container">
-                    <button x-on:click="updateOperationState('cleanup')">Stop</button>
-                    <button x-on:click="updateOperationState('paused')">Pause</button>
-                    <button x-on:click="updateOperationState('run_one_link')">Run One Step</button>
-                    <button x-on:click="updateOperationState('running')">run</button>
-                </div>
                 <div class="log-container">
-                    <h2 x-text="selectedOperation.name"></h2>
+                    <h2 class="is-size-7">Operation</h2>
+                    <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
                     <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
+                    <div class="controls-container">
+                        <p x-text="selectedOperation.state"></p>
+                        <button x-on:click="updateOperationState('cleanup')">Stop</button>
+                        <template x-if="selectedOperation.state ==='running'">
+                            <button x-on:click="updateOperationState('paused')">Pause</button>
+                        </template>
+                        <template x-if="selectedOperation.state !== 'running'">
+                            <button x-on:click="updateOperationState('running')">Run</button>
+                        </template>
+                        <button x-on:click="updateOperationState('run_one_link')">Run One Step</button>
+                    </div>
                     <template x-if="selectedOperation.chain">
                         <table class="table">
                             <thead>
@@ -80,7 +86,7 @@
                             <template x-for="(link, index) in selectedOperation.chain">
                                 <tr :key="index" x-bind:id="link.id + '-rs'" class="success">
                                     <td x-text="index"></td>
-                                    <td x-text="link.ability.name + (!(link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
+                                    <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
                                     <td x-text="'agent#'+link.paw">
                                     <td x-text="link.decide"></td>
                                     <td x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></td>
@@ -412,6 +418,7 @@
                 console.log('selected op', this.selectedOperationID);
                 restRequest('GET', {}, (res) => {
                     this.selectedOperation = JSON.parse(res);
+                    console.log('NEW OP stat', this.selectedOperation.state)
                     // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
                 }, endpoint + '/' + this.selectedOperationID);
             },
@@ -552,7 +559,7 @@
             updateOperationState(newState) {
                 console.log('OP BUTTON CLICKED', newState);
                 toast('Changing operation state to ' + newState);
-                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'state': newState});
+                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'state': newState}, () => this.getOperation());
             }
 
         }
@@ -572,6 +579,20 @@
 
     .log-container table {
         background-color: black;
+    }
+
+    .log-container table tr th {
+        color: #e6e6e6;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .log-container table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .log-container table tbody tr:active {
+        background-color: rgba(255, 255, 255, 0.2);
     }
 
     /*.log-container .success::before {*/
