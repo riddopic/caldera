@@ -57,19 +57,19 @@
                     <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
                 </div>
                 <div class="log-container">
-                    <h2 class="is-size-7">Operation</h2>
+                    <h2 class="is-size-7 has-text-weight-normal">Operation</h2>
                     <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
                     <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
-                    <div class="controls-container">
-                        <p x-text="selectedOperation.state"></p>
-                        <button x-on:click="updateOperationState('cleanup')">Stop</button>
+                    <p x-text="'Current state: ' + selectedOperation.state"></p>
+                    <div class="controls-container is-flex is-justify-content-center is-align-items-center">
+                        <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i alt="stop" class="fas fa-stop"></i></button>
                         <template x-if="selectedOperation.state ==='running'">
-                            <button x-on:click="updateOperationState('paused')">Pause</button>
+                            <button class="button no-style is-larger" x-on:click="updateOperationState('paused')"><i alt="pause" class="fas fa-pause-circle"></i></button>
                         </template>
                         <template x-if="selectedOperation.state !== 'running'">
-                            <button x-on:click="updateOperationState('running')">Run</button>
+                            <button class="button no-style is-larger" x-on:click="updateOperationState('running')"><i alt="run" class="fas fa-play-circle"></i></button>
                         </template>
-                        <button x-on:click="updateOperationState('run_one_link')">Run One Step</button>
+                        <button class="button no-style is-medium" x-on:click="updateOperationState('run_one_link')"><i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
                     </div>
                     <template x-if="selectedOperation.chain">
                         <table class="table">
@@ -89,7 +89,9 @@
                                     <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
                                     <td x-text="'agent#'+link.paw">
                                     <td x-text="link.decide"></td>
-                                    <td x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></td>
+                                    <td>
+                                        <button class="button no-style"><i x-bind:class="link.facts ? 'fas fa-star facts' : 'far fa-star'"></i></button>
+                                    </td>
 
                                     <!--                                    TODO add icon actions: remove link (status: -2?), question mark (show command in modal & clear results? (facts from loading link), add (status: -3?)-->
                                     <!--                                        TODO if -1 add (APPROVE) or (DISCARD) buttons after link in log-container? (line 547)-->
@@ -557,8 +559,7 @@
             },
 
             updateOperationState(newState) {
-                console.log('OP BUTTON CLICKED', newState);
-                toast('Changing operation state to ' + newState);
+                toast('Changing operation state to: ' + newState);
                 restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'state': newState}, () => this.getOperation());
             }
 
@@ -610,6 +611,30 @@
     /*}*/
 
     .log-container .failure {
+    }
+
+    button.is-larger {
+        font-size: 2.1rem;
+    }
+
+    button.no-style {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    button.no-style:hover {
+        border: none;
+        color: white;
+        transform: scale(1.2);
+    }
+
+    i.facts {
+        color: rgb(248, 193, 69);
+    }
+
+    i sub {
+      font-family: sans-serif;
     }
 
     .controls-container {
