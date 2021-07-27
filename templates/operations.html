@@ -56,20 +56,41 @@
                     </button>
                     <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
                 </div>
-                <div class="code-panel">
+                <div class="controls-container">
+                    <button x-on:click="updateOperationState('cleanup')">Stop</button>
+                    <button x-on:click="updateOperationState('paused')">Pause</button>
+                    <button x-on:click="updateOperationState('run_one_link')">Run One Step</button>
+                    <button x-on:click="updateOperationState('running')">run</button>
+                </div>
+                <div class="log-container">
                     <h2 x-text="selectedOperation.name"></h2>
                     <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
                     <template x-if="selectedOperation.chain">
-                        <ul>
-                            <template x-for="link in selectedOperation.chain">
-                                <li>
-                                    <span x-text="'agent#'+link.paw"></span>
-                                    <span x-text="link.ability.name"></span>
-                                    <span x-text="link.decide"></span>
-                                    <span x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></span>
-                                </li>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Agent</th>
+                                <th>Decide</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <template x-for="(link, index) in selectedOperation.chain">
+                                <tr :key="index" x-bind:id="link.id + '-rs'" class="success">
+                                    <td x-text="index"></td>
+                                    <td x-text="link.ability.name + (!(link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
+                                    <td x-text="'agent#'+link.paw">
+                                    <td x-text="link.decide"></td>
+                                    <td x-bind:class="link.facts ? 'tactic-has-facts' : 'tactic-no-facts'"></td>
+
+                                    <!--                                    TODO add icon actions: remove link (status: -2?), question mark (show command in modal & clear results? (facts from loading link), add (status: -3?)-->
+                                    <!--                                        TODO if -1 add (APPROVE) or (DISCARD) buttons after link in log-container? (line 547)-->
+                                </tr>
                             </template>
-                        </ul>
+                            </tbody>
+                        </table>
                     </template>
                 </div>
             </div>
@@ -236,7 +257,8 @@
                                         <label for="input-command">Type manual command:</label>
                                         <select x-model="manualCommand.executor" id="manual-executor">
                                             <template x-for="(executor, index) in selectedAgentExecutors">
-                                                <option x-text="executor" :value="selectedAgent.executors[index]" x-bind:selected="index === 0"></option>
+                                                <option x-text="executor" :value="selectedAgent.executors[index]"
+                                                        x-bind:selected="index === 0"></option>
                                             </template>
                                         </select>
                                         <input x-model="manualCommand.command" id="input-command" type="text" required
@@ -303,10 +325,13 @@
                         <template x-if="openModal === 'addCommand'">
                             <button class="button is-primary is-small"
                                     x-on:click="handleManualCommand">
+                                <!--                                TODO change save to add command? explore later-->
                                 Save
                             </button>
                         </template>
-                        <button class="button is-small" x-on:click="openModal = null"  x-text="openModal === 'addLink' ? 'Close' : 'Cancel'">Cancel</button>
+                        <button class="button is-small" x-on:click="openModal = null"
+                                x-text="openModal === 'addLink' ? 'Close' : 'Cancel'">Cancel
+                        </button>
                     </footer>
                 </div>
             </form>
@@ -443,7 +468,9 @@
                 })
             },
 
-            handlePotentialLink() { this.openModal = null;
+            // TODO not being used atm, remove or change to getLinks()???
+            handlePotentialLink() {
+                this.openModal = null;
                 // restRequest('POST', {
                 //     "index": "link",
                 //     "op_id": this.selectedOperationID,
@@ -522,6 +549,12 @@
                 })
             },
 
+            updateOperationState(newState) {
+                console.log('OP BUTTON CLICKED', newState);
+                toast('Changing operation state to ' + newState);
+                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'state': newState});
+            }
+
         }
     }
 </script>
@@ -531,10 +564,34 @@
         margin: 0;
     }
 
-    .code-panel {
+    .log-container {
         background-color: black;
         border-radius: 5px;
         padding: 1.3rem;
+    }
+
+    .log-container table {
+        background-color: black;
+    }
+
+    /*.log-container .success::before {*/
+    /*    height: auto;*/
+    /*    width: 20px;*/
+    /*    background-color: #ffa600;*/
+    /*    content: " ";*/
+    /*}*/
+
+    /*.log-container .success:hover .success::before {*/
+    /*    height: auto;*/
+    /*    width: 100px;*/
+    /*    content: 'success';*/
+    /*    background-color: #ffa600;*/
+    /*}*/
+
+    .log-container .failure {
+    }
+
+    .controls-container {
     }
 
     /*input:invalid:required::after {*/
