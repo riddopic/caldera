@@ -496,8 +496,11 @@
                     data = JSON.parse(data);
                     this.openModal = null;
                     if (data['error']) toast('Error: ' + data['error']);
-                    else toast('Added manual command.', true);
-                    this.resetObject(this.manualCommand)
+                    else {
+                        toast('Added manual command.', true);
+                        this.getOperation();
+                        this.resetObject(this.manualCommand)
+                    }
                 })
             },
 
@@ -615,6 +618,7 @@
         color: #e6e6e6;
         font-weight: 400;
         font-size: 0.75rem;
+
     }
 
     .log-container table tbody tr:hover {
