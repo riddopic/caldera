@@ -57,40 +57,55 @@
                     <button class="button is-primary" x-on:click="openModal = 'addLink'">+ Add potential link</button>
                 </div>
                 <div class="log-container">
-                    <h2 class="is-size-7 has-text-weight-normal">Operation</h2>
-                    <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
-                    <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
-                    <p x-text="'Current state: ' + selectedOperation.state"></p>
+                    <div class="columns">
+                        <div class="column">
+                            <h2 class="is-size-7 has-text-weight-normal">Operation</h2>
+                            <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
+                            <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
+                        </div>
+                        <div class="column is-flex is-align-items-flex-end is-justify-content-flex-end">
+                            <p x-text="'Current state: ' + selectedOperation.state"></p>
+                        </div>
+                    </div>
                     <div class="controls-container is-flex is-justify-content-center is-align-items-center">
-                        <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i alt="stop" class="fas fa-stop"></i></button>
+                        <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i
+                                alt="stop" class="fas fa-stop"></i></button>
                         <template x-if="selectedOperation.state ==='running'">
-                            <button class="button no-style is-larger" x-on:click="updateOperationState('paused')"><i alt="pause" class="fas fa-pause-circle"></i></button>
+                            <button class="button no-style is-larger" x-on:click="updateOperationState('paused')"><i
+                                    alt="pause" class="fas fa-pause-circle"></i></button>
                         </template>
                         <template x-if="selectedOperation.state !== 'running'">
-                            <button class="button no-style is-larger" x-on:click="updateOperationState('running')"><i alt="run" class="fas fa-play-circle"></i></button>
+                            <button class="button no-style is-larger" x-on:click="updateOperationState('running')">
+                                <i alt="run" class="fas fa-play-circle"></i></button>
                         </template>
-                        <button class="button no-style is-medium" x-on:click="updateOperationState('run_one_link')"><i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
+                        <button class="button no-style is-medium" x-on:click="updateOperationState('run_one_link')">
+                            <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
                     </div>
                     <template x-if="selectedOperation.chain">
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>#</th>
+                                <th class="decideColumn">Decide</th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Agent</th>
-                                <th>Decide</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
                             <template x-for="(link, index) in selectedOperation.chain">
                                 <tr :key="index" x-bind:id="link.id + '-rs'" class="success">
-                                    <td x-text="index"></td>
+                                    <td class="decideColumn" x-text="link.decide"></td>
+                                    <td class="linkStatusColumn"><span
+                                            x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
+                                            x-bind:class="'linkStatus status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"></span>
+                                    </td>
                                     <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
                                     <td x-text="'agent#'+link.paw">
-                                    <td x-text="link.decide"></td>
                                     <td>
-                                        <button class="button no-style"><i x-bind:class="link.facts ? 'fas fa-star facts' : 'far fa-star'"></i></button>
+                                        <button class="button no-style"><i
+                                                x-bind:class="link.facts ? 'fas fa-star facts' : 'far fa-star'"></i>
+                                        </button>
                                     </td>
 
                                     <!--                                    TODO add icon actions: remove link (status: -2?), question mark (show command in modal & clear results? (facts from loading link), add (status: -3?)-->
@@ -354,6 +369,15 @@
         cmd: '>',
         sh: '$'
     };
+    const linkStatuses = {
+        '0': 'success',
+        '1': 'failure',
+        '-2': 'remove',
+        '-3': 'collect',
+        '-4': 'untrusted',
+        '-5': 'visible',
+        '124': 'timeout'
+    };
 
     function alpineOperations() {
         return {
@@ -560,7 +584,11 @@
 
             updateOperationState(newState) {
                 toast('Changing operation state to: ' + newState);
-                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'state': newState}, () => this.getOperation());
+                restRequest('POST', {
+                    'index': 'operation',
+                    'op_id': this.selectedOperationID,
+                    'state': newState
+                }, () => this.getOperation());
             }
 
         }
@@ -576,6 +604,7 @@
         background-color: black;
         border-radius: 5px;
         padding: 1.3rem;
+        border-collapse: collapse;
     }
 
     .log-container table {
@@ -610,7 +639,8 @@
     /*    background-color: #ffa600;*/
     /*}*/
 
-    .log-container .failure {
+    .log-container .linkStatus {
+        /*border-left: 2px solid white;*/
     }
 
     button.is-larger {
@@ -634,10 +664,87 @@
     }
 
     i sub {
-      font-family: sans-serif;
+        font-family: sans-serif;
     }
 
     .controls-container {
+    }
+
+    .log-container table tbody td {
+        vertical-align: middle;
+        border: none;
+    }
+
+    .log-container .decideColumn {
+        color: gray;
+        width: 120px;
+        word-break: break-word;
+        font-size: 0.75rem;
+        text-align: center !important;
+    }
+
+    table tbody td.linkStatusColumn {
+        padding: 0;
+        vertical-align: top;
+    }
+
+    /*gray timeline*/
+    table tbody td span.linkStatus::before {
+        width: 2px;
+        height: 60px;
+        background-color: gray;
+        content: "";
+        display: inline-block;
+        position: absolute;
+    }
+
+    /*circle for event*/
+    table tbody td span.linkStatus::after {
+        position: relative;
+        left: -5px;
+        top: 22px;
+        display: block;
+        background: black;
+        border-radius: 50%;
+        height: 0.75em;
+        width: 0.75em;
+        content: "";
+        box-shadow: 0 0 0 0.2em #555; /*queued*/
+    }
+
+    /*success*/
+    table tbody td span.status-success::after {
+        box-shadow: 0 0 0 0.2em #4a9;
+    }
+
+    /*failure*/
+    table tbody td span.status-failure::after {
+        box-shadow: 0 0 0 0.2em #c31;
+    }
+
+    /*removed*/
+    table tbody td span.status-remove::after {
+        box-shadow: 0 0 0 0.2em #a05195;
+    }
+
+    /*collected*/
+    table tbody td span.status-collect::after {
+        box-shadow: 0 0 0 0.2em #ffb000;
+    }
+
+    /*untrusted*/
+    table tbody td span.status-untrusted::after {
+        box-shadow: 0 0 0 0.2em white;
+    }
+
+    /*visible*/
+    table tbody td span.status-visible::after {
+        box-shadow: 0 0 0 0.2em #f012be;
+    }
+
+    /*timeout*/
+    table tbody td span.status-timeout::after {
+        box-shadow: 0 0 0 0.2em cornflowerblue;
     }
 
     /*input:invalid:required::after {*/
