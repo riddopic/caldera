@@ -37,10 +37,12 @@
                     </button>
                 </div>
                 <div class="py-1">
-                    <button class="button is-primary">v Download full report</button>
+                    <button class="button is-primary" x-on:click="downloadInfo('full-report')">v Download full report
+                    </button>
                 </div>
                 <div class="py-1">
-                    <button class="button is-primary">v Download event logs</button>
+                    <button class="button is-primary" x-on:click="downloadInfo('event-logs')">v Download event logs
+                    </button>
                 </div>
                 <div class="py-1">
                     <button class="button is-primary">! Delete</button>
@@ -48,8 +50,8 @@
             </div>
         </div>
 
-        <template x-if="selectedOperationID">
-            <div>
+        <template x-if="selectedOperation">
+            <div x-show="selectedOperationID">
                 <div class="add-buttons">
                     <button class="button is-primary" x-on:click="openModal = 'addCommand'">+ Add manual command
                     </button>
@@ -58,10 +60,11 @@
                 <div class="log-container">
                     <div class="columns">
                         <div class="column">
-                            <h2 class="is-size-7 has-text-weight-normal">Operation</h2>
-                            <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
+                            <h3 class="mt-1 mb-0 is-size-3" x-text="selectedOperation.name"></h3>
+                            <h2 class="is-size-7 has-text-weight-normal mb-5">Operation</h2>
                             <label for="operation-obfuscator">Obfuscator: </label>
-                            <select id="operation-obfuscator" x-model="selectedOperation.obfuscator" x-on:change="updateObfuscator")>
+                            <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
+                                    x-on:change="updateObfuscator" )>
                                 {% for o in obfuscators %}
                                 <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
                                 {% endfor %}
@@ -496,7 +499,7 @@
                         // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
                     }, endpoint + '/' + this.selectedOperationID);
                 } else {
-                    toast('Select a valid operation to view');
+                    toast('Select a valid operation to view.');
                 }
             },
 
@@ -606,7 +609,11 @@
 
             updateObfuscator() {
                 console.log('chosen obfusc', this.selectedOperation.obfuscator)
-                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'obfuscator': this.selectedOperation.obfuscator});
+                restRequest('POST', {
+                    'index': 'operation',
+                    'op_id': this.selectedOperationID,
+                    'obfuscator': this.selectedOperation.obfuscator
+                });
             },
 
             updateLinkState(linkID, status) {
@@ -614,9 +621,35 @@
                 restRequest('POST', {'index': 'chain', 'link_id': linkID, 'status': status}, () => this.getOperation());
             },
 
+            downloadInfo(formatType) {
+                if (!this.selectedOperationID) {
+                    toast('Select a valid operation to download.');
+                } else {
+                    console.log('agent output val', this.isAgentOutputSelected, Number(this.isAgentOutputSelected));
+                    restRequest('POST', {
+                        'index': 'operation_report',
+                        'op_id': this.selectedOperationID,
+                        'agent_output': Number(this.isAgentOutputSelected),
+                        'format': formatType
+                    }, (data) => {
+                        data = JSON.parse(data);
+                        this.createDownloadReport(data, this.selectedOperation.name + '_' + formatType);
+                    })
+                }
+            },
+
             //
             // OBJECT MANIPULATION
             //
+
+            createDownloadReport(data, fileName) {
+                const dataURL = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+                toast('Downloading report: ' + fileName);
+                const elem = document.createElement('a')
+                elem.setAttribute('href', dataURL);
+                elem.setAttribute('download', fileName + '.json');
+                elem.click();
+            },
 
             resetObject(obj = {}) {
                 for (const field in obj) {
