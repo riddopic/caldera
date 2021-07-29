@@ -102,10 +102,27 @@
                                     </td>
                                     <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
                                     <td x-text="'agent#'+link.paw">
-                                    <td>
-                                        <button class="button no-style"><i
-                                                x-bind:class="link.facts ? 'fas fa-star facts' : 'far fa-star'"></i>
-                                        </button>
+                                    <td class="linkActionsColumn">
+                                        <span>
+                                            <template x-if="link.facts.length > 0">
+                                                <button title="show facts" class="button no-style"
+                                                        x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">
+                                                    <i class="fas fa-star facts"></i>
+                                                </button>
+                                            </template>
+                                            <template x-if="link.facts.length < 1">
+                                                <span title="no facts"><i class="far fa-star"></i></span>
+                                            </template>
+                                        </span>
+                                        <span>
+                                            <template x-if="link.status === -5">
+                                                <button title="remove link" class="button no-style" x-on:click="updateLinkState(link.id, -3)"><i class="fas fa-trash"></i></button>
+                                            </template>
+                                            <template x-if="!(link.collect.length > 0 || link.status <= -4)">
+                                                <button title="remove link" class="button no-style" x-on:click="updateLinkState(link.id, -2)"><i class="fas fa-plus"></i>
+                                                </button>
+                                            </template>
+                                        </span>
                                     </td>
 
                                     <!--                                    TODO add icon actions: remove link (status: -2?), question mark (show command in modal & clear results? (facts from loading link), add (status: -3?)-->
@@ -338,6 +355,18 @@
                         </div>
                     </template>
 
+                    <template x-if="openModal === 'showFacts'">
+                        <div>
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">Facts</p>
+                            </header>
+                            <section class="modal-card-body">
+                                <template x-for="result in selectedLinkResults">
+                                    <p x-text="fact"></p>
+                                </template>
+                            </section>
+                        </div>
+                    </template>
                     <footer class="modal-card-foot">
                         <!--                    TODO when user clicks on add operation it should show on view screen-->
                         <!--                    TODO add tooltip for scheduling, user must set AM/PM along with numerical time value in order for schedule to work-->
@@ -385,6 +414,8 @@
             selectedOperationID: null,
             selectedOperation: null,
             selectedAgentIndex: null,
+            selectedLink: null,
+            selectedLinkResults: null,
             isAgentOutputSelected: false,
             openModal: null,
             operations: [],
@@ -455,6 +486,12 @@
                 });
             },
 
+            getResults(linkID) {
+                restRequest('POST', {'index': 'result', 'link_id': linkID}, (data) => {
+                    console.log('get results called', data);
+                });
+            },
+
             handleStartOperation() {
                 if (!this.startOperation.jitter) {
                     this.startOperation.jitter = "4/8";
@@ -504,18 +541,6 @@
                 })
             },
 
-            // TODO not being used atm, remove or change to getLinks()???
-            handlePotentialLink() {
-                this.openModal = null;
-                // restRequest('POST', {
-                //     "index": "link",
-                //     "op_id": this.selectedOperationID,
-                //     "paw": this.selectedAgent.paw
-                // }, (data) => {
-                //     console.log('handlePotentialLink fetchlinks callback data:', data);
-                // }, '/api/rest');
-            },
-
             getAgentLinks() {
                 this.potentialLink.agent = this.selectedAgent;
                 this.tacticFiltersList = [];
@@ -534,6 +559,20 @@
                     this.getOperations();
                     this.getAgents();
                 }, '/api/rest');
+            },
+
+            updateOperationState(newState) {
+                toast('Changing operation state to: ' + newState);
+                restRequest('POST', {
+                    'index': 'operation',
+                    'op_id': this.selectedOperationID,
+                    'state': newState
+                }, () => this.getOperation());
+            },
+
+            updateLinkState(linkID, status) {
+                toast('Updating link status to: ' + linkStatuses[status]);
+                restRequest('POST', {'index': 'chain', 'link_id': linkID, 'status': status}, () => this.getOperation());
             },
 
             //
@@ -584,16 +623,6 @@
                     return match;
                 })
             },
-
-            updateOperationState(newState) {
-                toast('Changing operation state to: ' + newState);
-                restRequest('POST', {
-                    'index': 'operation',
-                    'op_id': this.selectedOperationID,
-                    'state': newState
-                }, () => this.getOperation());
-            }
-
         }
     }
 </script>
@@ -677,6 +706,7 @@
     .log-container table tbody td {
         vertical-align: middle;
         border: none;
+        height: 3.5rem;
     }
 
     .log-container .decideColumn {
@@ -690,6 +720,12 @@
     table tbody td.linkStatusColumn {
         padding: 0;
         vertical-align: top;
+    }
+
+    table tbody td.linkActionsColumn {
+        display: flex;
+        align-items: center;
+        flex-flow: row-reverse;
     }
 
     /*gray timeline*/
