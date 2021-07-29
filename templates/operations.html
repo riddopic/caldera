@@ -16,7 +16,6 @@
                             <div class="select">
                                 <select id="operation-select" x-on:change="getOperation()"
                                         x-model="selectedOperationID">
-                                    <!--                                    TODO deprecate disabled and make errors-->
                                     <option value="" default selected>Select an existing operation</option>
                                     <template x-for="op in operations">
                                         <option :key="op.id" :id="op.id-op.name" :value="op.id"
@@ -49,7 +48,7 @@
             </div>
         </div>
 
-        <template x-if="selectedOperation">
+        <template x-if="selectedOperationID">
             <div>
                 <div class="add-buttons">
                     <button class="button is-primary" x-on:click="openModal = 'addCommand'">+ Add manual command
@@ -61,7 +60,12 @@
                         <div class="column">
                             <h2 class="is-size-7 has-text-weight-normal">Operation</h2>
                             <h3 class="mt-5 mb-5 is-size-3" x-text="selectedOperation.name"></h3>
-                            <p x-text="'Obfuscator: ' + selectedOperation.obfuscator"></p>
+                            <label for="operation-obfuscator">Obfuscator: </label>
+                            <select id="operation-obfuscator" x-model="selectedOperation.obfuscator" x-on:change="updateObfuscator")>
+                                {% for o in obfuscators %}
+                                <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="column is-flex is-align-items-flex-end is-justify-content-flex-end">
                             <p x-text="'Current state: ' + selectedOperation.state"></p>
@@ -485,12 +489,15 @@
             },
 
             getOperation() {
-                console.log('selected op', this.selectedOperationID);
-                restRequest('GET', {}, (res) => {
-                    this.selectedOperation = JSON.parse(res);
-                    console.log('NEW OP stat', this.selectedOperation.state)
-                    // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
-                }, endpoint + '/' + this.selectedOperationID);
+                if (this.selectedOperationID) {
+                    restRequest('GET', {}, (res) => {
+                        this.selectedOperation = JSON.parse(res);
+                        console.log('NEW OP stat', this.selectedOperation.state)
+                        // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
+                    }, endpoint + '/' + this.selectedOperationID);
+                } else {
+                    toast('Select a valid operation to view');
+                }
             },
 
             getAgents() {
@@ -595,6 +602,11 @@
                     'op_id': this.selectedOperationID,
                     'state': newState
                 }, () => this.getOperation());
+            },
+
+            updateObfuscator() {
+                console.log('chosen obfusc', this.selectedOperation.obfuscator)
+                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'obfuscator': this.selectedOperation.obfuscator});
             },
 
             updateLinkState(linkID, status) {
