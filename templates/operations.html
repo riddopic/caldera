@@ -99,9 +99,9 @@
                                 <th></th>
                             </tr>
                             </thead>
-                            <tbody>
                             <template x-for="(link, index) in selectedOperation.chain">
-                                <tr :key="index" x-bind:id="link.id + '-rs'" class="success">
+                                <tbody :key="index">
+                                <tr x-bind:id="link.id + '-rs'" class="success">
                                     <td class="decideColumn" x-text="link.decide"></td>
                                     <td class="linkStatusColumn"><span
                                             x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
@@ -118,7 +118,8 @@
                                                 </button>
                                             </template>
                                             <template x-if="link.facts.length < 1">
-                                                <span title="no facts"><i class="far fa-star"></i></span>
+                                                <button disabled class="button no-style" title="no facts"><i
+                                                        class="far fa-star no-facts"></i></button>
                                             </template>
                                         </span>
                                         <span>
@@ -134,13 +135,43 @@
                                                 </button>
                                             </template>
                                         </span>
+                                        <template x-if="link.status === -1">
+                                        <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === link.id ? 'selected' : '') ">
+                                            <button title="edit command" class="button no-style"
+                                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === link.id) ? null : link.id"><i
+                                                    class="fas fa-pencil-alt editCommand"></i></button>
+                                        </span>
+                                        </template>
                                     </td>
-
-                                    <!--                                    TODO add icon actions: remove link (status: -2?), question mark (show command in modal & clear results? (facts from loading link), add (status: -3?)-->
-                                    <!--                                        TODO if -1 add (APPROVE) or (DISCARD) buttons after link in log-container? (line 547)-->
                                 </tr>
+                                <tr class="linkEditCommandRow" x-show="showLinkEditDropdown === link.id">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td x-init="link.command = b64DecodeUnicode(link.command)">
+                                        <label for="editedCommand"></label>
+                                        <textarea id="editedCommand"
+                                                  class="code"
+                                                  contenteditable
+                                                  x-model="link.command"
+                                                  spellcheck="false"></textarea>
+
+<!--                                        TODO what if rest request returns error-->
+                                        <div class="linkEditControls">
+                                            <button class="button no-style is-small"
+                                                    x-on:click="updateLinkState(link.id, -3, link.command); showLinkEditDropdown = null">
+                                                Approve
+                                            </button>
+                                            <button class="button no-style is-small"
+                                                    x-on:click="updateLinkState(link.id, -2, link.command); showLinkEditDropdown = null">
+                                                Discard
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
                             </template>
-                            </tbody>
                         </table>
                     </template>
                 </div>
@@ -471,6 +502,8 @@
             techniqueFiltersList: [],
             filteredLinksList: [],
             schedule: "",
+            showLinkEditDropdown: null,
+            editedCommand: null,
 
             get selectedAgent() {
                 return this.selectedOperation?.host_group[this.selectedAgentIndex];
@@ -616,9 +649,18 @@
                 });
             },
 
-            updateLinkState(linkID, status) {
+            updateLinkState(linkID, status, command = null) {
+                console.log('lINKID', linkID, status, command)
                 toast('Updating link status to: ' + linkStatuses[status]);
-                restRequest('POST', {'index': 'chain', 'link_id': linkID, 'status': status}, () => this.getOperation());
+                const data = {
+                    'index': 'chain',
+                    'link_id': linkID,
+                    'status': status
+                };
+                if (command) {
+                    data['command'] = command;
+                }
+                restRequest('POST', data, () => this.getOperation());
             },
 
             downloadInfo(formatType) {
@@ -704,14 +746,15 @@
         margin: 0;
     }
 
-    .modal-card code {
+    .modal-card code, .code {
         color: #ff8181;
+        background-color: #262626;
     }
 
     .log-container {
         background-color: black;
         border-radius: 5px;
-        padding: 1.3rem;
+        padding: 2rem 1.3rem 4rem;
         border-collapse: collapse;
     }
 
@@ -734,26 +777,16 @@
         background-color: rgba(255, 255, 255, 0.2);
     }
 
-    /*.log-container .success::before {*/
-    /*    height: auto;*/
-    /*    width: 20px;*/
-    /*    background-color: #ffa600;*/
-    /*    content: " ";*/
-    /*}*/
-
-    /*.log-container .success:hover .success::before {*/
-    /*    height: auto;*/
-    /*    width: 100px;*/
-    /*    content: 'success';*/
-    /*    background-color: #ffa600;*/
-    /*}*/
-
-    .log-container .linkStatus {
-        /*border-left: 2px solid white;*/
+    .button:active, .button.is-active, .button:focus, .button.is-focused {
+        color: inherit;
     }
 
     button.is-larger {
         font-size: 2.1rem;
+    }
+
+    .linkActionsColumn button[disabled] {
+        background-color: transparent;
     }
 
     button.no-style {
@@ -772,6 +805,15 @@
         color: rgb(248, 193, 69);
     }
 
+    i.no-facts {
+        color: gray;
+    }
+
+    i.editCommand::after {
+        font-size: 5pt;
+        content: "▼";
+    }
+
     i sub {
         font-family: sans-serif;
     }
@@ -782,7 +824,7 @@
     .log-container table tbody td {
         vertical-align: middle;
         border: none;
-        height: 3.5rem;
+        min-height: 3.5rem;
     }
 
     .log-container .decideColumn {
@@ -802,16 +844,48 @@
         display: flex;
         align-items: center;
         flex-flow: row-reverse;
+        padding-bottom: 0;
+    }
+
+    .editButtonContainer.selected {
+        background-color: #2b2929;
+        border-radius: 2px 2px 0;
+        padding: 5px 0;
+    }
+
+    table tbody tr.linkEditCommandRow td:last-child {
+        display: flex;
+        justify-content: flex-end;
+        flex-flow: column wrap;
+        padding-bottom: 0;
+        background-color: #2b2929;
+        border-radius: 2px;
+    }
+
+    table tbody tr.linkEditCommandRow textarea {
+        border-radius: 2px;
+        line-height: 0.75rem;
+    }
+
+    table tbody tr.linkEditCommandRow .linkEditControls {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: flex-end;
+        align-items: center;
     }
 
     /*gray timeline*/
     table tbody td span.linkStatus::before {
         width: 2px;
-        height: 60px;
+        height: 140px;
         background-color: gray;
         content: "";
         display: inline-block;
         position: absolute;
+    }
+
+    table tbody:last-child td span.linkStatus::before {
+        height: 75px;
     }
 
     /*circle for event*/
