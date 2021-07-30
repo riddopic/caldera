@@ -69,6 +69,8 @@
                                 <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation</option>
                                 {% endfor %}
                             </select>
+                            <label for="toggleAutonomous" x-text="selectedOperation.autonomous ? 'Autonomous' : 'Manual'"></label>
+                            <input type="checkbox" id="toggleAutonomous" x-model="selectedOperation.autonomous" x-on:change="updateOperationToggle()"/>
                         </div>
                         <div class="column is-flex is-align-items-flex-end is-justify-content-flex-end">
                             <p x-text="'Current state: ' + selectedOperation.state"></p>
@@ -632,6 +634,11 @@
                     'op_id': this.selectedOperationID,
                     'state': newState
                 }, () => this.getOperation());
+            },
+
+            updateOperationToggle() {
+                console.log('SELECTED OP TOGGLE', this.selectedOperation.autonomous);
+                restRequest('POST', {'index': 'operation', 'op_id': this.selectedOperationID, 'autonomous': 'toggleMe'});
             },
 
             updateObfuscator() {
