@@ -128,7 +128,7 @@
                                                         x-on:click="updateLinkState(link.id, -3)"><i
                                                         class="fas fa-plus"></i>
                                             </template>
-                                            <template x-if="!(link.collect || link.status <= -4)">
+                                            <template x-if="!(link.collect || link.status <= -4) || link.status === -1">
                                                 <button title="remove link" class="button no-style"
                                                         x-on:click="updateLinkState(link.id, -2)"><i
                                                         class="fas fa-trash"></i></button>
@@ -159,13 +159,9 @@
 
 <!--                                        TODO what if rest request returns error-->
                                         <div class="linkEditControls">
-                                            <button class="button no-style is-small"
+                                            <button class="button is-primary is-small"
                                                     x-on:click="updateLinkState(link.id, -3, link.command); showLinkEditDropdown = null">
-                                                Approve
-                                            </button>
-                                            <button class="button no-style is-small"
-                                                    x-on:click="updateLinkState(link.id, -2, link.command); showLinkEditDropdown = null">
-                                                Discard
+                                                Update
                                             </button>
                                         </div>
                                     </td>
@@ -855,9 +851,10 @@
 
     table tbody tr.linkEditCommandRow td:last-child {
         display: flex;
-        justify-content: flex-end;
-        flex-flow: column wrap;
-        padding-bottom: 0;
+        justify-content: space-around;
+        padding: 0;
+        flex-flow: row;
+        align-items: center;
         background-color: #2b2929;
         border-radius: 2px;
     }
@@ -865,6 +862,7 @@
     table tbody tr.linkEditCommandRow textarea {
         border-radius: 2px;
         line-height: 0.75rem;
+        width: 10rem;
     }
 
     table tbody tr.linkEditCommandRow .linkEditControls {
