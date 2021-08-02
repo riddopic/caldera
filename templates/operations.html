@@ -160,16 +160,16 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td x-init="link.command = b64DecodeUnicode(link.command)">
+                                    <td x-init="editedCommand = editedCommand ? editedCommand : b64DecodeUnicode(link.command)">
                                         <label for="editedCommand"></label>
                                         <textarea id="editedCommand"
                                                   class="code"
                                                   contenteditable
-                                                  x-model="link.command"
+                                                  x-model="editedCommand"
                                                   spellcheck="false"></textarea>
                                         <div class="linkEditControls">
                                             <button class="button is-primary is-small"
-                                                    x-on:click="updateLinkState(link.id, -3, link.command); showLinkEditDropdown = null">
+                                                    x-on:click="updateLinkState(link.id, -3, editedCommand); showLinkEditDropdown = null">
                                                 Update
                                             </button>
                                         </div>
