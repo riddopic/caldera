@@ -54,44 +54,51 @@
         <template x-if="selectedOperation">
             <div x-show="selectedOperationID">
                 <div class="log-container">
-                    <div class="columns">
-                        <div class="column">
-                            <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
-                            <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
-
-                            <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
-                            <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
-
-                            <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
-                            <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
-                        </div>
-                        <div class="column controls-form-group">
-                            <div class="is-flex is-flex-direction-row is-4">
-                                <label for="operation-obfuscator" title="choose obfuscation method">
-                                    <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
-                                            x-on:change="updateObfuscator()">
-                                        {% for o in obfuscators %}
-                                        <option value="{{ o.name|e }}">Use {{ o.name|e }} obfuscation</option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                    <div>
+                        <div class="is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center mx-2">
+                            <div>
+                                <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
+                                <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
                             </div>
-                            <button title="add manual command" class="button is-primary is-small"
-                                    x-on:click="openModal = 'addCommand'">Add manual command
-                            </button>
-                            <button title="add potential link" class="button is-primary is-small"
-                                    x-on:click="openModal = 'addLink'">Add potential link
-                            </button>
-                            <div class="toggle">
-                                <label class="switch" for="toggleAutonomous">
+                            <div>
+                                <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
+                                <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
+                            </div>
+                            <div>
+                                <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
+                                <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
+                            </div>
+                        </div>
+                        <div class="columns is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center">
+                            <label class="column is-one-third" for="operation-obfuscator"
+                                   title="choose obfuscation method">
+                                <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
+                                        x-on:change="updateObfuscator()">
+                                    {% for o in obfuscators %}
+                                    <option value="{{ o.name|e }}">Use {{ o.name|e }} obfuscation</option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <div class="toggleContainer">
+                                <label class="toggleSwitch" for="toggleAutonomous">
                                     <input type="checkbox" id="toggleAutonomous"
                                            x-model="selectedOperation.autonomous"
+                                           x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
                                            x-on:change="updateOperationToggle()"/>
-                                    <span class="slider round">
-                                        <span x-bind:class="selectedOperation.autonomous ? 'on' : 'off'"
-                                              x-text="selectedOperation.autonomous ? 'Autonomous' : 'Manual'"></span>
+                                    <span class="toggleSlider toggleSliderRound"
+                                          x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
+                                        <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
+                                              x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
                                 </span>
                                 </label>
+                            </div>
+                            <div class="column is-one-third is-flex is-flex-direction-row">
+                                <button title="add manual command" class="button is-primary is-small ml-2"
+                                        x-on:click="openModal = 'addCommand'">Add manual command
+                                </button>
+                                <button title="add potential link" class="button is-primary is-small ml-2"
+                                        x-on:click="openModal = 'addLink'">Add potential link
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -805,40 +812,25 @@
         background-color: #262626;
     }
 
-    .controls-form-group {
-        display: flex;
-        align-items: flex-end;
-        flex-flow: column;
-        justify-content: space-around;
-    }
-
-    .controls-form-group, .toggle, select {
-        width: 100%;
-    }
-
-    .controls-form-group button {
-        width: 40%;
-    }
-
-    .toggle {
-        display: flex;
-        justify-content: flex-end;
-    }
-
     /*TOGGLE STYLE*/
     /* toggle buttons */
-    .switch {
+    .toggleContainer {
+        display: flex;
+        align-items: center;
+    }
+
+    .toggleSwitch {
         position: relative;
         display: inline-block;
-        width: 130px;
+        width: 140px;
         height: 34px;
     }
 
-    .switch input {
+    .toggleSwitch input {
         display: none;
     }
 
-    .slider {
+    .toggleSlider {
         border: 1px solid white;
         position: absolute;
         cursor: pointer;
@@ -846,39 +838,30 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: black;
-        -webkit-transition: 0.4s;
-        transition: 0.4s;
+        border-radius: 34px;
     }
 
-    .slider::before {
+    .toggleSlider::before {
         position: absolute;
         content: "";
         height: 26px;
         width: 26px;
-        left: 4px;
         bottom: 4px;
         background-color: white;
-        -webkit-transition: 0.4s;
-        transition: 0.4s;
+        transition: all 0.3s ease;
+        left: 4px;
     }
 
-    .toggle input:checked + .slider {
+    .toggle-off {
+        background-color: black;
+    }
+
+    .toggle-on {
         background-color: green;
     }
 
-    .toggle input:checked + .slider::before {
-        -webkit-transform: translateX(95px);
-        -ms-transform: translateX(95px);
-        transform: translateX(95px);
-    }
-
-    .on {
-        display: none;
-    }
-
-    .on,
-    .off {
+    .toggle-slider-on,
+    .toggle-slider-off {
         color: white;
         position: absolute;
         transform: translate(-50%, -50%);
@@ -888,19 +871,15 @@
         font-family: Verdana, sans-serif;
     }
 
-    .toggle input:checked + .slider .on {
-        display: block;
+    .toggle-on.toggleSlider.toggleSlider::before {
+        transform: translatex(105px);
     }
 
-    .toggle input:checked + .slider .off {
-        display: none;
+    .toggle-off.toggleSlider.toggleSlider::before {
+        transform: translatex(0px);
     }
 
-    .slider.round {
-        border-radius: 34px;
-    }
-
-    .slider.round::before {
+    .toggleSlider.toggleSliderRound::before {
         border-radius: 50%;
     }
 
