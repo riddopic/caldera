@@ -348,12 +348,14 @@
                                             <div class="modal-form-fields" id="autonomous-source">
                                                 {% for s in sources %}
                                                 {% if loop.first %}
-                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}" x-model="startOperation.source"
+                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}"
+                                                       x-model="startOperation.source"
                                                        checked>
                                                 <label for="{{ s.name|e }}">{{ s.name|e
                                                     }}</label>
                                                 {% else %}
-                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}" x-model="startOperation.source">
+                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}"
+                                                       x-model="startOperation.source">
                                                 <label for="{{ s.name|e }}">{{ s.name|e
                                                     }}</label>
                                                 {% endif %}
@@ -374,7 +376,8 @@
                                         <div>
                                             <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs)</label>
                                             <div class="modal-form-fields" id="autonomous-cleanup_timeout">
-                                                <input class="input" x-model="startOperation.timeout" type="number" placeholder="30" value="30" min="0" max="300"
+                                                <input class="input" x-model="startOperation.timeout" type="number"
+                                                       placeholder="30" value="30" min="0" max="300"
                                                        onchange="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
                                             </div>
                                         </div>
@@ -390,19 +393,9 @@
                                     </div>
                                     <div class="modal-form" x-show="openModalForm?.stealth">
                                         <div>
-                                            <label for="basic-groups">Groups:</label>
-                                            <div class="modal-form-fields" id="basic-groups">
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="">
-                                        <div>
-                                            <p class="heading pt-2">Stealth</p>
-                                            <div class="m-1">
-                                                <select x-model="startOperation.obfuscator"
-                                                        x-effect="updateObject('obfuscator', $el.selectedOptions[0].value)">
+                                            <label for="stealth-obfuscator">Obfuscator</label>
+                                            <div class="modal-form-fields" id="stealth-obfuscator">
+                                                <select x-model="startOperation.obfuscator">
                                                     {% for o in obfuscators %}
                                                     {% if loop.first %}
                                                     <option value="{{ o.name|e }}" selected>{{ o.name|e }}
@@ -414,30 +407,46 @@
                                                     {% endif %}
                                                     {% endfor %}
                                                 </select>
-                                                <label class="heading pt-2" for="queueJitter" required>Jitter
-                                                    (min/max)
-                                                    sec</label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="stealth-jitter">Jitter (min/max) sec:</label>
+                                            <div class="modal-form-fields" id="stealth-jitter">
                                                 <input class="input" x-model="startOperation.jitter"
-                                                       x-effect="updateObject('jitter', $el.value)"
-                                                       id="queueJitter" value="4/8" type="text"
+                                                       id="stealth-jitter" value="4/8" type="text"
                                                        pattern="[0-9\/0-9]*"
                                                        placeholder="4/8"/>
-                                                <label class="heading pt-2" for="queueVisibility">Adjust
-                                                    visibility: </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="stealth-queue">Adjust visibility:</label>
+                                            <div class="modal-form-fields" id="stealth-jitter">
                                                 <input x-model="startOperation.visibility"
-                                                       x-effect="updateObject('visibility', $el.value)"
-                                                       id="queueVisibility"
+                                                       id="stealth-queue"
                                                        type="range" value="50" min="1" max="100"
                                                        onchange="toast('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
                                                 <span x-text="startOperation.visibility"></span>
                                             </div>
                                         </div>
+                                    </div>
+
+
+                                    <div class="modal-form-group-header">
+                                        <button type="button" class="button no-style heading pt-2"
+                                                x-on:click="openModalForm = {schedule: true}"
+                                                x-bind:class="openModalForm?.schedule ? 'expanded' : 'collapsed'">
+                                            Schedule
+                                        </button>
+                                        <hr>
+                                    </div>
+                                    <div class="modal-form" x-show="openModalForm?.schedule">
                                         <div>
-                                            <div class="m-1">
-                                                <label class="heading pt-2" for="schedule-time">Schedule
-                                                    operation</label>
+                                            <label for="schedule-schedule">Schedule operation:</label>
+                                            <div class="modal-form-fields" id="schedule-schedule">
+                                                <label for="schedule-time">scheduled for</label>
                                                 <input class="input" x-model="schedule"
-                                                       x-effect="schedule = $el.value" type="time"
+                                                       type="time"
                                                        id="schedule-time" value="00:00">
                                             </div>
                                         </div>
