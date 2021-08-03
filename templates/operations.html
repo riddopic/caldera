@@ -284,7 +284,6 @@
                                                 <label for="auto-close">Auto close operation</label>
                                             </div>
                                         </div>
-
                                         <div>
                                             <label for="basic-run">Run:</label>
 
@@ -361,8 +360,6 @@
                                                 {% endfor %}
                                             </div>
                                         </div>
-
-
                                         <div>
                                             <label for="autonomous-use_learning_parsers">Parser:</label>
                                             <div class="modal-form-fields" id="autonomous-use_learning_parsers">
@@ -374,12 +371,27 @@
                                                 <label for="parsers-no_default">Do not use default parsers</label>
                                             </div>
                                         </div>
-
                                         <div>
                                             <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs)</label>
                                             <div class="modal-form-fields" id="autonomous-cleanup_timeout">
                                                 <input class="input" x-model="startOperation.timeout" type="number" placeholder="30" value="30" min="0" max="300"
                                                        onchange="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="modal-form-group-header">
+                                        <button type="button" class="button no-style heading pt-2"
+                                                x-on:click="openModalForm = {stealth: true}"
+                                                x-bind:class="openModalForm?.stealth ? 'expanded' : 'collapsed'">Stealth
+                                        </button>
+                                        <hr>
+                                    </div>
+                                    <div class="modal-form" x-show="openModalForm?.stealth">
+                                        <div>
+                                            <label for="basic-groups">Groups:</label>
+                                            <div class="modal-form-fields" id="basic-groups">
                                             </div>
                                         </div>
                                     </div>
@@ -416,7 +428,7 @@
                                                        x-effect="updateObject('visibility', $el.value)"
                                                        id="queueVisibility"
                                                        type="range" value="50" min="1" max="100"
-                                                       onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
+                                                       onchange="toast('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
                                                 <span x-text="startOperation.visibility"></span>
                                             </div>
                                         </div>
