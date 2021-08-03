@@ -226,205 +226,210 @@
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
                                                 x-on:click="openModalForm = {basic: true}"
-                                                x-bind:class="openModalForm?.basic ? 'expanded' : 'collapsed'">Basic options
+                                                x-bind:class="openModalForm?.basic ? 'expanded' : 'collapsed'">Basic
+                                            options
                                         </button>
                                         <hr>
                                     </div>
                                     <div class="modal-form" x-show="openModalForm?.basic">
-                                            <div>
-                                                <label for="basic-groups">Groups:</label>
-                                                <div class="modal-form-fields" id="basic-groups">
+                                        <div>
+                                            <label for="basic-groups">Groups:</label>
+                                            <div class="modal-form-fields" id="basic-groups">
                                                 <span>
                                                     <input id="all-groups" value="" type="radio"
-                                                           x-model="startOperation.group">
+                                                           x-model="startOperation.group" checked>
                                                     <label for="all-groups">Use all groups</label>
                                                 </span>
-                                                    <template x-for="(group, index) in agentGroups">
+                                                <template x-for="(group, index) in agentGroups">
                                                     <span>
                                                         <input x-bind:id="index" type="radio" x-bind:value="group"
                                                                x-model="startOperation.group">
                                                         <label x-bind:for="index" x-text="group"></label>
                                                     </span>
-                                                    </template>
-                                                </div>
+                                                </template>
                                             </div>
-                                            <div>
-                                                <label for="basic-adversary">Adversary:</label>
-
-                                                <div class="modal-form-fields" id="basic-adversary">
-                                                    <select x-model="startOperation.adversary_id"
-                                                            x-effect="updateObject('adversary_id', $el.selectedOptions[0].value)">
-                                                        <option value="" selected>No adversary (manual)</option>
-                                                        {% for adv in adversaries %}
-                                                        {% if adv.has_repeatable_abilities %}
-                                                        <!--                                            TODO deprecate data-has-repeatable later, since it seems to be used for purely styling-->
-                                                        <option id="qflow-{{ adv.adversary_id|e }}"
-                                                                value="{{ adv.adversary_id|e }}"
-                                                                data-has-repeatable>{{ adv.name|e }}
-                                                        </option>
-                                                        {% else %}
-                                                        <option id="qflow-{{ adv.adversary_id|e }}"
-                                                                value="{{ adv.adversary_id|e }}">{{
-                                                            adv.name|e }}
-                                                        </option>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
+                                        </div>
+                                        <div>
+                                            <label for="basic-adversary">Adversary:</label>
+                                            <div class="modal-form-fields" id="basic-adversary">
+                                                <select x-model="startOperation.adversary_id"
+                                                        x-effect="updateObject('adversary_id', $el.selectedOptions[0].value)">
+                                                    <option value="" selected>No adversary (manual)</option>
+                                                    {% for adv in adversaries %}
+                                                    {% if adv.has_repeatable_abilities %}
+                                                    <option id="qflow-{{ adv.adversary_id|e }}"
+                                                            value="{{ adv.adversary_id|e }}">
+                                                        {{ adv.name|e }}
+                                                    </option>
+                                                    {% else %}
+                                                    <option id="qflow-{{ adv.adversary_id|e }}"
+                                                            value="{{ adv.adversary_id|e }}">{{
+                                                        adv.name|e }}
+                                                    </option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
                                             </div>
-                                            <div>
-                                                <label for="basic-keep">Keep:</label>
-
-                                                <div class="modal-form-fields" id="basic-keep">
-                                                    <input type="radio" id="keep-open"
-                                                           x-model="startOperation.auto_close"
-                                                           value="0" checked>
-                                                    <label for="keep-open">Keep open forever</label>
-                                                    <input type="radio" id="auto-close"
-                                                           x-model="startOperation.auto_close"
-                                                           value="1">
-                                                    <label for="auto-close">Auto close operation</label>
-                                                </div>
+                                        </div>
+                                        <div>
+                                            <label for="basic-keep">Keep:</label>
+                                            <div class="modal-form-fields" id="basic-keep">
+                                                <input type="radio" id="keep-open"
+                                                       x-model="startOperation.auto_close"
+                                                       value="0" checked>
+                                                <label for="keep-open">Keep open forever</label>
+                                                <input type="radio" id="auto-close"
+                                                       x-model="startOperation.auto_close"
+                                                       value="1">
+                                                <label for="auto-close">Auto close operation</label>
                                             </div>
+                                        </div>
 
-                                            <div>
-                                                <label for="basic-run">Run:</label>
+                                        <div>
+                                            <label for="basic-run">Run:</label>
 
-                                                <div class="modal-form-fields" id="basic-run">
-                                                    <input type="radio" x-model="startOperation.state"
-                                                           id="run-immediately"
-                                                           value="running" checked>
-                                                    <label for="run-immediately">Run immediately</label>
-                                                    <input type="radio" x-model="startOperation.state"
-                                                           id="pause-on-start"
-                                                           value="paused">
-                                                    <label for="pause-on-start">Pause on start</label>
-                                                </div>
+                                            <div class="modal-form-fields" id="basic-run">
+                                                <input type="radio" x-model="startOperation.state"
+                                                       id="run-immediately"
+                                                       value="running" checked>
+                                                <label for="run-immediately">Run immediately</label>
+                                                <input type="radio" x-model="startOperation.state"
+                                                       id="pause-on-start"
+                                                       value="paused">
+                                                <label for="pause-on-start">Pause on start</label>
                                             </div>
+                                        </div>
                                     </div>
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
                                                 x-on:click="openModalForm = {autonomous: true}"
-                                                x-bind:class="openModalForm?.autonomous ? 'expanded' : 'collapsed'">Autonomous
+                                                x-bind:class="openModalForm?.autonomous ? 'expanded' : 'collapsed'">
+                                            Autonomous
                                         </button>
                                         <hr>
                                     </div>
                                     <div class="modal-form" x-show="openModalForm?.autonomous">
                                         <div>
-                                                <label for="autonomous-autonomous">Autonomous:</label>
-                                                <div class="modal-form-fields" id="autonomous-autonomous">
-                                                        <input type="radio" id="run-autonomously" x-model="startOperation.autonomous" value="1" selected>
-                                                        <label for="run-autonomously">Run autonomously</label>
-                                                        <input type="radio" id="manual-approval" x-model="startOperation.autonomous" value="0">
-                                                        <label for="manual-approval">Require manual approval</label>
-                                                </div>
+                                            <label for="autonomous-autonomous">Autonomous:</label>
+                                            <div class="modal-form-fields" id="autonomous-autonomous">
+                                                <input type="radio" id="run-autonomously"
+                                                       x-model="startOperation.autonomous" value="1" checked>
+                                                <label for="run-autonomously">Run autonomously</label>
+                                                <input type="radio" id="manual-approval"
+                                                       x-model="startOperation.autonomous" value="0">
+                                                <label for="manual-approval">Require manual approval</label>
                                             </div>
+                                        </div>
 
-                                            <div>
-                                                <label for="autonomous-planner">Planner:</label>
-                                                <div class="modal-form-fields" id="autonomous-planner">
-                                                    {% for p in planners %}
-                                                    {% if p.name == "atomic" %}
-                                                    <input type="radio" id="{{ p.name|e }}" x-model="startOperation.planner" selected>
-                                                    <label for="{{ p.name|e }}">{{ p.name|e }} planner</label>
-                                                    {% elif p.allow_repeatable_abilities %}
-                                                    <input type="radio" id="{{ p.name|e }}" x-model="startOperation.planner">
-                                                    <label for="{{ p.name|e }}">{{ p.name|e }} planner</label>
+                                        <div>
+                                            <label for="autonomous-planner">Planner:</label>
+                                            <div class="modal-form-fields" id="autonomous-planner">
+                                                {% for p in planners %}
+                                                {% if p.name == "atomic" %}
+                                                <input type="radio" id="{{ p.name|e }}" x-model="startOperation.planner"
+                                                       value="{{ p.name|e }}"
+                                                       checked>
+                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
+                                                {% elif p.allow_repeatable_abilities %}
+                                                <input type="radio" id="{{ p.name|e }}"
+                                                       value="{{ p.name|e }}"
+                                                       x-model="startOperation.planner">
+                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
+                                                {% else %}
+                                                <input type="radio" id="{{ p.name|e }}"
+                                                       value="{{ p.name|e }}"
+                                                       x-model="startOperation.planner">
+                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="autonomous-source">Source:</label>
+                                            <div class="modal-form-fields" id="autonomous-source">
+                                                {% for s in sources %}
+                                                {% if loop.first %}
+                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}" x-model="startOperation.source"
+                                                       checked>
+                                                <label for="{{ s.name|e }}">{{ s.name|e
+                                                    }}</label>
+                                                {% else %}
+                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}" x-model="startOperation.source">
+                                                <label for="{{ s.name|e }}">{{ s.name|e
+                                                    }}</label>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+
+                                        <div>
+                                            <label for="autonomous-use_learning_parsers">Parser:</label>
+                                            <div class="modal-form-fields" id="autonomous-use_learning_parsers">
+                                                <input type="radio" id="parsers-default"
+                                                       x-model="startOperation.use_learning_parsers" value="1" checked>
+                                                <label for="parsers-default">Use default parsers</label>
+                                                <input type="radio" id="parsers-no_default"
+                                                       x-model="startOperation.use_learning_parsers" value="0">
+                                                <label for="parsers-no_default">Do not use default parsers</label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs)</label>
+                                            <div class="modal-form-fields" id="autonomous-cleanup_timeout">
+                                                <input class="input" x-model="startOperation.timeout" type="number" placeholder="30" value="30" min="0" max="300"
+                                                       onchange="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="">
+                                        <div>
+                                            <p class="heading pt-2">Stealth</p>
+                                            <div class="m-1">
+                                                <select x-model="startOperation.obfuscator"
+                                                        x-effect="updateObject('obfuscator', $el.selectedOptions[0].value)">
+                                                    {% for o in obfuscators %}
+                                                    {% if loop.first %}
+                                                    <option value="{{ o.name|e }}" selected>{{ o.name|e }}
+                                                        obfuscation
+                                                    </option>
                                                     {% else %}
-                                                    <input type="radio" id="{{ p.name|e }}" x-model="startOperation.planner">
-                                                    <label for="{{ p.name|e }}">{{ p.name|e }} planner</label>
+                                                    <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation
+                                                    </option>
                                                     {% endif %}
                                                     {% endfor %}
-                                                </div>
-                                            </div>
-
-
-                                            <div>
-                                                <label for="autonomous-source">source</label>
-                                                <div class="modal-form-fields" id="autonomous-source">
-                                                    <input type="radio" id="">
-
-                                                    <select x-model="startOperation.source"
-                                                            x-effect="updateObject('source', $el.selectedOptions[0].value)">
-                                                        {% for s in sources %}
-                                                        {% if loop.first %}
-                                                        <option value="{{ s.name|e }}" selected>Use {{ s.name|e }} facts
-                                                        </option>
-                                                        {% else %}
-                                                        <option value="{{ s.name|e }}">Use {{ s.name|e }} facts</option>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-
-                                            <div>
-                                                <label for="autonomous-use_learning_parsers">use_learning_parsers</label>
-                                                <div class="modal-form-fields" id="autonomous-use_learning_parsers">
-                                                    MEOW
-                                                </div>
-                                            </div>
-                                            <select x-model="startOperation.use_learning_parsers"
-                                                    x-effect="updateObject('use_learning_parsers', $el.selectedOptions[0].value)">
-                                                <option value="1" selected>Use default parsers</option>
-                                                <option value="0">Do not use default parsers</option>
-                                            </select>
-                                            <label class="heading pt-2" for="queueTimeout">Cleanup Timeout
-                                                (secs)</label>
-                                            <input class="input" x-model="startOperation.timeout"
-                                                   x-effect="updateObject('timeout', $el.value)"
-                                                   id="queueTimeout"
-                                                   type="number" placeholder="30" value="30" min="0" max="300"
-                                                   onchange="stream('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
-                                        </div>
-
-
-                                        <div class="">
-                                            <div>
-                                                <p class="heading pt-2">Stealth</p>
-                                                <div class="m-1">
-                                                    <select x-model="startOperation.obfuscator"
-                                                            x-effect="updateObject('obfuscator', $el.selectedOptions[0].value)">
-                                                        {% for o in obfuscators %}
-                                                        {% if loop.first %}
-                                                        <option value="{{ o.name|e }}" selected>{{ o.name|e }}
-                                                            obfuscation
-                                                        </option>
-                                                        {% else %}
-                                                        <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation
-                                                        </option>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                    <label class="heading pt-2" for="queueJitter" required>Jitter
-                                                        (min/max)
-                                                        sec</label>
-                                                    <input class="input" x-model="startOperation.jitter"
-                                                           x-effect="updateObject('jitter', $el.value)"
-                                                           id="queueJitter" value="4/8" type="text"
-                                                           pattern="[0-9\/0-9]*"
-                                                           placeholder="4/8"/>
-                                                    <label class="heading pt-2" for="queueVisibility">Adjust
-                                                        visibility: </label>
-                                                    <input x-model="startOperation.visibility"
-                                                           x-effect="updateObject('visibility', $el.value)"
-                                                           id="queueVisibility"
-                                                           type="range" value="50" min="1" max="100"
-                                                           onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
-                                                    <span x-text="startOperation.visibility"></span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="m-1">
-                                                    <label class="heading pt-2" for="schedule-time">Schedule
-                                                        operation</label>
-                                                    <input class="input" x-model="schedule"
-                                                           x-effect="schedule = $el.value" type="time"
-                                                           id="schedule-time" value="00:00">
-                                                </div>
+                                                </select>
+                                                <label class="heading pt-2" for="queueJitter" required>Jitter
+                                                    (min/max)
+                                                    sec</label>
+                                                <input class="input" x-model="startOperation.jitter"
+                                                       x-effect="updateObject('jitter', $el.value)"
+                                                       id="queueJitter" value="4/8" type="text"
+                                                       pattern="[0-9\/0-9]*"
+                                                       placeholder="4/8"/>
+                                                <label class="heading pt-2" for="queueVisibility">Adjust
+                                                    visibility: </label>
+                                                <input x-model="startOperation.visibility"
+                                                       x-effect="updateObject('visibility', $el.value)"
+                                                       id="queueVisibility"
+                                                       type="range" value="50" min="1" max="100"
+                                                       onchange="stream('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
+                                                <span x-text="startOperation.visibility"></span>
                                             </div>
                                         </div>
+                                        <div>
+                                            <div class="m-1">
+                                                <label class="heading pt-2" for="schedule-time">Schedule
+                                                    operation</label>
+                                                <input class="input" x-model="schedule"
+                                                       x-effect="schedule = $el.value" type="time"
+                                                       id="schedule-time" value="00:00">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </section>
                             </div>
                         </template>
@@ -905,26 +910,32 @@
         justify-content: flex-end;
         align-items: center;
     }
+
     .modal-form-group-header {
         display: flex;
         justify-content: center;
         align-items: center;
     }
+
     .modal-form-group-header button {
         width: 25%;
         padding-left: 0;
         padding-right: 0;
         text-align: left;
     }
+
     .modal-form-group-header button.expanded::after {
         content: "▼";
     }
+
     .modal-form-group-header button.collapsed::after {
         content: "►";
     }
+
     .modal-form-group-header button:hover {
         transform: none !important;
     }
+
     .modal-form-group-header hr {
         background-color: #363636;
         height: 1px;
