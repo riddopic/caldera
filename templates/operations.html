@@ -92,7 +92,7 @@
                                 </span>
                                 </label>
                             </div>
-                            <div class="column is-one-third is-flex is-flex-direction-row">
+                            <div class="column is-one-third is-flex is-flex-direction-row is-justify-content-flex-end">
                                 <button title="add manual command" class="button is-primary is-small ml-2"
                                         x-on:click="openModal = 'addCommand'">Add manual command
                                 </button>
@@ -430,8 +430,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
                                                 x-on:click="openModalForm.schedule = !openModalForm.schedule"
@@ -460,28 +458,44 @@
                                     <p class="modal-card-title">Add New Manual Command</p>
                                 </header>
                                 <section class="modal-card-body">
-                                    <label for="manual-agent">Choose an agent:</label>
-                                    <select id="manual-agent" x-model="selectedAgentIndex">
-                                        <option default>none selected</option>
-                                        <template x-for="(agent, index) in selectedOperation.host_group">
-                                            <option :value="index"
-                                                    x-text="agent.display_name + '-' + agent.paw"></option>
-                                        </template>
-                                    </select>
-                                    <template x-if="selectedAgent">
+                                    <div class="modal-form">
                                         <div>
-                                            <label for="input-command">Type manual command:</label>
-                                            <select x-model="manualCommand.executor" id="manual-executor">
-                                                <template x-for="(executor, index) in selectedAgentExecutors">
-                                                    <option x-text="executor" :value="selectedAgent.executors[index]"
-                                                            x-bind:selected="index === 0"></option>
-                                                </template>
-                                            </select>
-                                            <input x-model="manualCommand.command" id="input-command" type="text"
-                                                   required
-                                                   placeholder="Echo 'Hello World!'">
+                                            <label for="manual-agent">Choose an agent:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="manual-agent" x-model="selectedAgentIndex">
+                                                    <option default>none selected</option>
+                                                    <template x-for="(agent, index) in selectedOperation.host_group">
+                                                        <option :value="index"
+                                                                x-text="agent.display_name + '-' + agent.paw"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
                                         </div>
-                                    </template>
+                                        <template x-if="selectedAgent">
+                                            <div>
+                                                <label for="input-command">Type manual command:</label>
+                                                <div class="modal-form-fields">
+                                                    <div class="modal-form-fields-columns">
+                                                        <select x-model="manualCommand.executor" id="manual-executor"
+                                                                class="column">
+                                                            <template
+                                                                    x-for="(executor, index) in selectedAgentExecutors">
+                                                                <option x-text="executor"
+                                                                        :value="selectedAgent.executors[index]"
+                                                                        x-bind:selected="index === 0"></option>
+                                                            </template>
+                                                        </select>
+                                                        <input x-model="manualCommand.command"
+                                                               class="column"
+                                                               id="input-command"
+                                                               type="text"
+                                                               required
+                                                               placeholder="Echo 'Hello World!'">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </section>
                             </div>
                         </template>
@@ -492,45 +506,69 @@
                                     <p class="modal-card-title">Add New Potential Link</p>
                                 </header>
                                 <section class="modal-card-body">
-                                    <select x-model="selectedAgentIndex" x-on:change="getAgentLinks()">
-                                        <option default value="">Choose an agent...</option>
-                                        <template x-for="(agent, index) in selectedOperation.host_group">
-                                            <option :value="index"
-                                                    x-text="agent.display_name + '-' + agent.paw"></option>
+                                    <div class="modal-form">
+                                        <div>
+                                            <label for="link-agent">Agent:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="link-agent"
+                                                        x-model="selectedAgentIndex"
+                                                        x-on:change="getAgentLinks()">
+                                                    <option default value="">Choose an agent...</option>
+                                                    <template x-for="(agent, index) in selectedOperation.host_group">
+                                                        <option :value="index"
+                                                                x-text="agent.display_name + '-' + agent.paw"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="link-tactic">Tactic:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="link-tactic"
+                                                        x-model="potentialLink.tactic"
+                                                        x-on:change="filterAbilities()">
+                                                    <option default value="">Choose a tactic...</option>
+                                                    <template x-for="tactic in tacticFiltersList">
+                                                        <option x-text="tactic"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="link-technique">Technique:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="link-technique"
+                                                        x-model="potentialLink.technique"
+                                                        x-on:change="filterAbilities()">
+                                                    <option default>Choose a technique...</option>
+                                                    <template x-for="technique in techniqueFiltersList">
+                                                        <option x-text="technique"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-results">
+                                        <div class="navbar-divider"></div>
+                                        <p class="is-flex is-justify-content-flex-end is-size-7"
+                                           x-text="filteredLinksList.length + ' potential link' + ((filteredLinksList.length === 1) ? '' : 's')"></p>
+                                        <template x-if="filteredLinksList">
+                                            <ul>
+                                                <template x-for="link in filteredLinksList">
+                                                    <li>
+                                                        <p x-text="link.ability.name"></p>
+                                                        <button class="button is-primary is-small"
+                                                                x-on:click="addLink(link)">
+                                                            Add Link
+                                                        </button>
+                                                    </li>
+                                                </template>
+                                            </ul>
                                         </template>
-                                    </select>
-
-                                    <select x-model="potentialLink.tactic" x-on:change="filterAbilities()">
-                                        <option default value="">Choose a tactic...</option>
-                                        <template x-for="tactic in tacticFiltersList">
-                                            <option x-text="tactic"></option>
+                                        <template x-if="!filteredLinksList"><p>Building potential links...</p>
                                         </template>
-                                    </select>
-
-                                    <select x-model="potentialLink.technique" x-on:change="filterAbilities()">
-                                        <option default>Choose a technique...</option>
-                                        <template x-for="technique in techniqueFiltersList">
-                                            <option x-text="technique"></option>
-                                        </template>
-                                    </select>
+                                    </div>
                                 </section>
-                                <div>
-                                    <p x-text="filteredLinksList.length + ' potential link' + ((filteredLinksList.length === 1) ? '' : 's')"></p>
-                                    <template x-if="filteredLinksList">
-                                        <ul>
-                                            <template x-for="link in filteredLinksList">
-                                                <li>
-                                                    <p x-text="link.ability.name"></p>
-                                                    <button class="button is-primary is-small"
-                                                            x-on:click="addLink(link)">
-                                                        Add Link
-                                                    </button>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </template>
-                                    <template x-if="!filteredLinksList"><p>Building potential links...</p></template>
-                                </div>
                             </div>
                         </template>
 
@@ -567,9 +605,16 @@
                                     Save
                                 </button>
                             </template>
-                            <button class="button is-small" x-on:click="openModal = null"
-                                    x-text="openModal === 'addLink' ? 'Close' : 'Cancel'">Cancel
-                            </button>
+                            <template x-if="openModal === 'addLink'">
+                                <div class="modal-results-close">
+                                    <button class="button is-small is-primary" x-on:click="openModal = null">Close
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="openModal !== 'addLink'">
+                                <button class="button is-small" x-on:click="openModal = null">Cancel
+                                </button>
+                            </template>
                         </footer>
                     </div>
                 </form>
@@ -784,7 +829,7 @@
                 restRequest('PUT', {...link, index: "link"}, () => {
                     this.getOperations();
                     this.getAgents();
-                }, '/api/rest');
+                });
             },
 
             updateOperationState(newState) {
@@ -919,7 +964,7 @@
         margin: 0;
     }
 
-    /*MODAL STYLE*/
+    /*MODAL FORM STYLE*/
     .modal-form > div {
         width: 100%;
         display: flex;
@@ -974,12 +1019,58 @@
         margin: 0.75rem;
     }
 
+    .modal-form-fields-columns {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 0.75rem;
+    }
+
     .modal-form-fields label {
         margin-right: 1rem;
         font-size: 0.75rem;
     }
 
-    /*END MODAL STYLE*/
+    .modal-results ul {
+        margin-left: 0;
+    }
+
+    .modal-results li {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-flow: row wrap;
+        list-style: none;
+    }
+
+    .modal-results li p {
+        width: 85%;
+        text-align: left;
+        padding-left: 0.75rem;
+    }
+
+    .modal-results li button {
+        width: 15%;
+        display: flex;
+    }
+
+    .modal-results li:not(:last-child)::after {
+        background-color: #262626;
+        border: none;
+        display: block;
+        height: 2px;
+        margin: 0.5rem 0;
+        content: "";
+    }
+
+    .modal-results-close {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /*END MODAL FORM STYLE*/
 
     .modal-card code, .code {
         color: #ff8181;
