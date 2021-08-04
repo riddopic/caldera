@@ -24,10 +24,10 @@
                                 </select>
                             </div>
                             <div class="column pl-0 is-flex">
-                                <button title="add operation" class="button is-primary is-small"
+                                <button type="button" title="add operation" class="button is-primary is-small"
                                         x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
                                 </button>
-                                <button title="delete operation" class="button is-primary is-small ml-2"
+                                <button type="button" title="delete operation" class="button is-primary is-small ml-2"
                                         x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
                             </div>
                         </div>
@@ -129,7 +129,7 @@
                             </thead>
                             <template x-for="(link, index) in selectedOperation.chain">
                                 <tbody :key="index">
-                                <tr x-bind:id="link.id + '-rs'" class="success">
+                                <tr x-bind:id="link.id" class="success">
                                     <td class="decideColumn" x-text="link.decide"></td>
                                     <td class="linkStatusColumn"><span
                                             x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
@@ -477,7 +477,7 @@
                                                 <div class="modal-form-fields">
                                                     <div class="modal-form-fields-columns">
                                                         <select x-model="manualCommand.executor" id="manual-executor"
-                                                                class="column">
+                                                                class="column executor-selector">
                                                             <template
                                                                     x-for="(executor, index) in selectedAgentExecutors">
                                                                 <option x-text="executor"
@@ -486,7 +486,7 @@
                                                             </template>
                                                         </select>
                                                         <input x-model="manualCommand.command"
-                                                               class="column"
+                                                               class="column input executor-command"
                                                                id="input-command"
                                                                type="text"
                                                                required
@@ -1025,6 +1025,16 @@
         justify-content: space-between;
         align-items: center;
         margin-left: 0.75rem;
+        width: 100%;
+    }
+
+    .modal-form-fields-columns .executor-selector {
+        width: 10% !important;
+        flex: none !important;
+    }
+
+    .modal-form-fields-columns .executor-command {
+        width: 90%;
     }
 
     .modal-form-fields label {
