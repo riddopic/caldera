@@ -23,11 +23,11 @@
                                     </template>
                                 </select>
                             </div>
-                            <div class="column pl-0">
+                            <div class="column pl-0 is-flex">
                                 <button title="add operation" class="button is-primary is-small"
                                         x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
                                 </button>
-                                <button title="delete operation" class="button is-primary is-small"
+                                <button title="delete operation" class="button is-primary is-small ml-2"
                                         x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
                             </div>
                         </div>
@@ -218,20 +218,19 @@
                                             <label for="op-name">Operation name:</label>
                                             <div class="modal-form-fields">
                                                 <input class="input" id="op-name" type="text"
-                                                       x-model="startOperation.name"
-                                                       x-effect="updateObject('name', $el.value)" required>
+                                                       x-model="startOperation.name" required>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm = {basic: true}"
-                                                x-bind:class="openModalForm?.basic ? 'expanded' : 'collapsed'">Basic
-                                            options
+                                                x-on:click="openModalForm.basic = !openModalForm.basic"
+                                                x-bind:class="openModalForm.basic ? 'expanded' : 'collapsed'">
+                                            <span>Basic options</span>
+                                            <span class="navbar-divider"></span>
                                         </button>
-                                        <hr>
                                     </div>
-                                    <div class="modal-form" x-show="openModalForm?.basic">
+                                    <div class="modal-form" x-show="openModalForm.basic">
                                         <div>
                                             <label for="basic-groups">Groups:</label>
                                             <div class="modal-form-fields" id="basic-groups">
@@ -252,8 +251,7 @@
                                         <div>
                                             <label for="basic-adversary">Adversary:</label>
                                             <div class="modal-form-fields" id="basic-adversary">
-                                                <select x-model="startOperation.adversary_id"
-                                                        x-effect="updateObject('adversary_id', $el.selectedOptions[0].value)">
+                                                <select x-model="startOperation.adversary_id">
                                                     <option value="" selected>No adversary (manual)</option>
                                                     {% for adv in adversaries %}
                                                     {% if adv.has_repeatable_abilities %}
@@ -301,13 +299,13 @@
                                     </div>
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm = {autonomous: true}"
-                                                x-bind:class="openModalForm?.autonomous ? 'expanded' : 'collapsed'">
-                                            Autonomous
+                                                x-on:click="openModalForm.autonomous = !openModalForm.autonomous"
+                                                x-bind:class="openModalForm.autonomous ? 'expanded' : 'collapsed'">
+                                            <span>Autonomous</span>
+                                            <span class="navbar-divider"></span>
                                         </button>
-                                        <hr>
                                     </div>
-                                    <div class="modal-form" x-show="openModalForm?.autonomous">
+                                    <div class="modal-form" x-show="openModalForm.autonomous">
                                         <div>
                                             <label for="autonomous-autonomous">Autonomous:</label>
                                             <div class="modal-form-fields" id="autonomous-autonomous">
@@ -374,7 +372,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs)</label>
+                                            <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs):</label>
                                             <div class="modal-form-fields" id="autonomous-cleanup_timeout">
                                                 <input class="input" x-model="startOperation.timeout" type="number"
                                                        placeholder="30" value="30" min="0" max="300"
@@ -386,14 +384,15 @@
 
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm = {stealth: true}"
-                                                x-bind:class="openModalForm?.stealth ? 'expanded' : 'collapsed'">Stealth
+                                                x-on:click="openModalForm.stealth = !openModalForm.stealth"
+                                                x-bind:class="openModalForm.stealth ? 'expanded' : 'collapsed'">
+                                            <span>Stealth</span>
+                                            <span class="navbar-divider"></span>
                                         </button>
-                                        <hr>
                                     </div>
-                                    <div class="modal-form" x-show="openModalForm?.stealth">
+                                    <div class="modal-form" x-show="openModalForm.stealth">
                                         <div>
-                                            <label for="stealth-obfuscator">Obfuscator</label>
+                                            <label for="stealth-obfuscator">Obfuscator:</label>
                                             <div class="modal-form-fields" id="stealth-obfuscator">
                                                 <select x-model="startOperation.obfuscator">
                                                     {% for o in obfuscators %}
@@ -412,16 +411,17 @@
 
                                         <div>
                                             <label for="stealth-jitter">Jitter (min/max) sec:</label>
-                                            <div class="modal-form-fields" id="stealth-jitter">
+                                            <div class="modal-form-fields">
                                                 <input class="input" x-model="startOperation.jitter"
                                                        id="stealth-jitter" value="4/8" type="text"
+                                                       required
                                                        pattern="[0-9\/0-9]*"
                                                        placeholder="4/8"/>
                                             </div>
                                         </div>
                                         <div>
                                             <label for="stealth-queue">Adjust visibility:</label>
-                                            <div class="modal-form-fields" id="stealth-jitter">
+                                            <div class="modal-form-fields">
                                                 <input x-model="startOperation.visibility"
                                                        id="stealth-queue"
                                                        type="range" value="50" min="1" max="100"
@@ -434,20 +434,19 @@
 
                                     <div class="modal-form-group-header">
                                         <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm = {schedule: true}"
-                                                x-bind:class="openModalForm?.schedule ? 'expanded' : 'collapsed'">
-                                            Schedule
+                                                x-on:click="openModalForm.schedule = !openModalForm.schedule"
+                                                x-bind:class="openModalForm.schedule ? 'expanded' : 'collapsed'">
+                                            <span>Schedule</span>
+                                            <span class="navbar-divider"></span>
                                         </button>
-                                        <hr>
                                     </div>
-                                    <div class="modal-form" x-show="openModalForm?.schedule">
+                                    <div class="modal-form" x-show="openModalForm.schedule">
                                         <div>
                                             <label for="schedule-schedule">Schedule operation:</label>
-                                            <div class="modal-form-fields" id="schedule-schedule">
-                                                <label for="schedule-time">scheduled for</label>
+                                            <div class="modal-form-fields">
                                                 <input class="input" x-model="schedule"
                                                        type="time"
-                                                       id="schedule-time" value="00:00">
+                                                       id="schedule-schedule" value="00:00">
                                             </div>
                                         </div>
                                     </div>
@@ -608,7 +607,12 @@
             selectedLinkCommand: null,
             isAgentOutputSelected: false,
             openModal: null,
-            openModalForm: null,
+            openModalForm: {
+                'basic': false,
+                'autonomous': false,
+                'stealth': false,
+                'schedule': false
+            },
             operations: [],
             startOperation: {
                 index: "operations",
@@ -717,9 +721,7 @@
             },
 
             handleStartOperation() {
-                if (!this.startOperation.jitter) {
-                    this.startOperation.jitter = "4/8";
-                }
+                if (!this.validateJitter(this.startOperation.jitter)) return;
                 if (!this.startOperation.name) {
                     toast('Error: Operation name field is empty.');
                 } else if (this.schedule) {
@@ -876,25 +878,22 @@
                 }
             },
 
-            updateObject(fieldName, newValue, obj = this.startOperation) {
-                if (obj === this.startOperation && fieldName === 'jitter') {
-                    if (!newValue.includes('/')) return;
-                    let [jitterMin, jitterMax] = newValue.split("/");
-                    jitterMin = parseInt(jitterMin);
-                    jitterMax = parseInt(jitterMax);
+            validateJitter(newValue = "") {
+                if (!newValue.includes('/')) return false;
+                let [jitterMin, jitterMax] = newValue.split("/");
+                jitterMin = parseInt(jitterMin);
+                jitterMax = parseInt(jitterMax);
 
-                    if (jitterMin < 0 || jitterMax < 0) {
-                        toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
-                        return;
-                    }
-                    if (jitterMin >= jitterMax) {
-                        toast('Error: Jitter MIN must be less than the jitter MAX.');
-                        return;
-                    }
+                if (jitterMin < 0 || jitterMax < 0) {
+                    toast('Error: Jitter ' + (!jitterMin ? 'MIN' : 'MAX') + ' must be valid.');
+                    return false;
                 }
-                if (obj[fieldName] !== null) {
-                    obj[fieldName] = newValue;
+                if (jitterMin >= jitterMax) {
+                    toast('Error: Jitter MIN must be less than the jitter MAX.');
+                    return false;
                 }
+
+                return true;
             },
 
             filterAbilities() {
@@ -911,6 +910,11 @@
 </script>
 
 <style>
+    .modal-card {
+        max-height: 90vh;
+        overflow-y: scroll;
+    }
+
     .column {
         margin: 0;
     }
@@ -921,15 +925,14 @@
         display: flex;
         flex-flow: row wrap;
         justify-content: center;
-        border: 2px solid red;
     }
 
     .modal-form > div > label {
         width: 30%;
-        border: 2px solid blue;
         display: flex;
         justify-content: flex-end;
         align-items: center;
+        font-size: 0.75rem;
     }
 
     .modal-form-group-header {
@@ -939,28 +942,24 @@
     }
 
     .modal-form-group-header button {
-        width: 25%;
+        width: 100%;
         padding-left: 0;
         padding-right: 0;
         text-align: left;
     }
 
-    .modal-form-group-header button.expanded::after {
+    .modal-form-group-header button.expanded span:first-child::after {
+        margin-left: 0.2rem;
         content: "▼";
     }
 
-    .modal-form-group-header button.collapsed::after {
+    .modal-form-group-header button.collapsed span:first-child::after {
+        margin-left: 0.2rem;
         content: "►";
     }
 
     .modal-form-group-header button:hover {
         transform: none !important;
-    }
-
-    .modal-form-group-header hr {
-        background-color: #363636;
-        height: 1px;
-        width: 75%;
     }
 
     .modal-form-fields {
@@ -969,12 +968,10 @@
         justify-content: flex-start;
         align-items: center;
         flex-flow: row wrap;
-        border: 2px solid green;
     }
 
     .modal-form-fields input, .modal-form-fields select {
         margin: 0.75rem;
-        border: 2px solid purple;
     }
 
     .modal-form-fields label {
