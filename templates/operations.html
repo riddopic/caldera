@@ -8,198 +8,226 @@
                 </p>
             </div>
             <hr>
-            <div class="columns">
-                <div class="column">
-                    <form class="m-1">
-                        <label class="label">Choose an operation to view:</label>
-                        <div class="field columns">
-                            <div class="column is-two-thirds">
-                                <select id="operation-select" x-on:change="getOperation()"
-                                        x-model="selectedOperationID">
-                                    <option value="" default selected>Select an existing operation</option>
-                                    <template x-for="op in operations">
-                                        <option :key="op.id" :id="op.id-op.name" :value="op.id"
-                                                x-text="`${op.name} - ${op.start}`"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <div class="column pl-0 is-flex">
-                                <button type="button" title="add operation" class="button is-primary is-small"
-                                        x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
-                                </button>
-                                <button type="button" title="delete operation" class="button is-primary is-small ml-2"
-                                        x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="column is-flex is-align-items-flex-end is-flex-direction-column">
-                    <div class="mr-2">
-                        <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">
-                        <label class="pl-1 is-small" for="agent-output">include agent output</label>
-                    </div>
-                    <div class="is-flex mt-2">
-                        <button title="download full report" class="button is-primary is-small ml-2"
-                                x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full
-                            report
-                        </button>
-                        <button title="download event logs" class="button is-primary is-small ml-2"
-                                x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event logs
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <template x-if="selectedOperation">
-            <div x-show="selectedOperationID">
-                <div class="log-container">
-                    <div>
-                        <div class="is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center mx-2">
-                            <div>
-                                <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
-                                <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
-                            </div>
-                            <div>
-                                <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
-                                <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
-                            </div>
-                            <div>
-                                <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
-                                <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
-                            </div>
-                        </div>
-                        <div class="columns is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center">
-                            <label class="column is-one-third" for="operation-obfuscator"
-                                   title="choose obfuscation method">
-                                <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
-                                        x-on:change="updateObfuscator()">
-                                    {% for o in obfuscators %}
-                                    <option value="{{ o.name|e }}">Use {{ o.name|e }} obfuscation</option>
-                                    {% endfor %}
-                                </select>
-                            </label>
-                            <div class="toggleContainer">
-                                <label class="toggleSwitch" for="toggleAutonomous">
-                                    <input type="checkbox" id="toggleAutonomous"
-                                           x-model="selectedOperation.autonomous"
-                                           x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
-                                           x-on:change="updateOperationToggle()"/>
-                                    <span class="toggleSlider toggleSliderRound"
-                                          x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
-                                        <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
-                                              x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
-                                </span>
-                                </label>
-                            </div>
-                            <div class="column is-one-third is-flex is-flex-direction-row is-justify-content-flex-end">
-                                <button title="add manual command" class="button is-primary is-small ml-2"
-                                        x-on:click="openModal = 'addCommand'">Add manual command
-                                </button>
-                                <button title="add potential link" class="button is-primary is-small ml-2"
-                                        x-on:click="openModal = 'addLink'">Add potential link
-                                </button>
-                            </div>
+        <div class="columns">
+            <div class="column is-one-quarter is-flex-direction-column">
+                <div class="columns">
+                    <div class="column is-flex is-justify-content-space-between is-flex-direction-column">
+                        <label for="op-search">Search operations:</label>
+                        <div class="is-flex is-align-items-center">
+                            <i class="fas fa-search"></i>
+                            <input id="op-search" placeholder="Operation name:">
+                            <i class="fas fa-close"></i>
                         </div>
                     </div>
-                    <div class="controls-container is-flex is-justify-content-center is-align-items-center">
-                        <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i
-                                alt="stop" class="fas fa-stop"></i></button>
-                        <template x-if="selectedOperation.state ==='running'">
-                            <button class="button no-style is-larger" x-on:click="updateOperationState('paused')"><i
-                                    alt="pause" class="fas fa-pause-circle"></i></button>
-                        </template>
-                        <template x-if="selectedOperation.state !== 'running'">
-                            <button class="button no-style is-larger" x-on:click="updateOperationState('running')">
-                                <i alt="run" class="fas fa-play-circle"></i></button>
-                        </template>
-                        <button class="button no-style is-medium" x-on:click="updateOperationState('run_one_link')">
-                            <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
+                    <div class="column pl-0 is-flex is-align-items-flex-end">
+                        <button type="button" title="delete operation" class="button is-primary is-small"
+                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
+                        <button title="download event logs" class="button is-primary is-small ml-2"
+                                x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
+                        </button>
+                        <!--                        TODO add modal to download button-->
+                        <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
+                        <!--                            <div class="mr-2">-->
+                        <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
+                        <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
+                        <!--                            </div>-->
+                        <!--                            <div class="is-flex mt-2">-->
+                        <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
+                        <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
+                        <!--                                    report-->
+                        <!--                                </button>-->
+                        <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
+                        <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
+                        <!--                                    logs-->
+                        <!--                                </button>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
                     </div>
-                    <template x-if="selectedOperation.chain">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th class="decideColumn">Decide</th>
-                                <th></th>
-                                <th>Name</th>
-                                <th>Agent</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <template x-for="(link, index) in selectedOperation.chain">
-                                <tbody :key="index">
-                                <tr x-bind:id="link.id" class="success">
-                                    <td class="decideColumn" x-text="link.decide"></td>
-                                    <td class="linkStatusColumn"><span
-                                            x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
-                                            x-bind:class="'linkStatus status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"></span>
-                                    </td>
-                                    <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
-                                    <td x-text="'agent#'+link.paw">
-                                    <td class="linkActionsColumn">
-                                        <span>
-                                            <template x-if="link.facts.length > 0">
-                                                <button title="show facts" class="button no-style"
-                                                        x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">
-                                                    <i class="fas fa-star facts"></i>
-                                                </button>
-                                            </template>
-                                            <template x-if="link.facts.length < 1">
-                                                <button disabled class="button no-style" title="no facts"><i
-                                                        class="far fa-star no-facts"></i></button>
-                                            </template>
-                                        </span>
-                                        <span>
-                                            <template x-if="link.status === -5">
-                                                <button title="remove link" class="button no-style"
-                                                        x-on:click="updateLinkState(link.id, -3)"><i
-                                                        class="fas fa-plus"></i></button>
-                                            </template>
-                                            <template x-if="!(link.collect || link.status <= -4) || link.status === -1">
-                                                <button title="remove link" class="button no-style"
-                                                        x-on:click="updateLinkState(link.id, -2)"><i
-                                                        class="fas fa-trash"></i></button>
-                                                </button>
-                                            </template>
-                                        </span>
-                                        <template x-if="link.status === -1">
-                                        <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === link.id ? 'selected' : '') ">
-                                            <button title="edit command" class="button no-style"
-                                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === link.id) ? null : link.id"><i
-                                                    class="fas fa-pencil-alt editCommand"></i></button>
-                                        </span>
-                                        </template>
-                                    </td>
-                                </tr>
-                                <tr class="linkEditCommandRow" x-show="showLinkEditDropdown === link.id">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td x-init="editedCommand = editedCommand ? editedCommand : b64DecodeUnicode(link.command)">
-                                        <label for="editedCommand"></label>
-                                        <textarea id="editedCommand"
-                                                  class="code"
-                                                  contenteditable
-                                                  x-model="editedCommand"
-                                                  spellcheck="false"></textarea>
-                                        <div class="linkEditControls">
-                                            <button class="button is-primary is-small"
-                                                    x-on:click="updateLinkState(link.id, -3, editedCommand); showLinkEditDropdown = null">
-                                                Update
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </template>
-                        </table>
+                </div>
+                <div class="is-flex is-flex-direction-column">
+                    <button type="button" title="add operation" class="button is-primary is-small"
+                            x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
+                        Add new operation
+                    </button>
+                    <template x-for="op in operations">
+                        <button class="no-style operation-menu-links"
+                                :key="op.id"
+                                x-text="`${op.name} - ${op.start}`"
+                                x-on:click="selectedOperationID = op.id; getOperation()"></button>
                     </template>
                 </div>
             </div>
-        </template>
 
+
+            <div class="column">
+                <template x-if="selectedOperation">
+                    <div x-show="selectedOperationID">
+                        <div x-show="false" class="log-container">
+                            <div>
+                                <div class="is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center mx-2">
+                                    <div>
+                                        <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
+                                        <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
+                                    </div>
+                                    <div>
+                                        <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
+                                        <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
+                                    </div>
+                                    <div>
+                                        <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
+                                        <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
+                                    </div>
+                                </div>
+                                <div class="columns is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center">
+                                    <label class="column is-one-third" for="operation-obfuscator"
+                                           title="choose obfuscation method">
+                                        <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
+                                                x-on:change="updateObfuscator()">
+                                            {% for o in obfuscators %}
+                                            <option value="{{ o.name|e }}">Use {{ o.name|e }} obfuscation</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                    <div class="toggleContainer">
+                                        <label class="toggleSwitch" for="toggleAutonomous">
+                                            <input type="checkbox" id="toggleAutonomous"
+                                                   x-model="selectedOperation.autonomous"
+                                                   x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
+                                                   x-on:change="updateOperationToggle()"/>
+                                            <span class="toggleSlider toggleSliderRound"
+                                                  x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
+                                        <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
+                                              x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
+                                </span>
+                                        </label>
+                                    </div>
+                                    <div class="column is-one-third is-flex is-flex-direction-row is-justify-content-flex-end">
+                                        <button title="add manual command" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'addCommand'">Add manual command
+                                        </button>
+                                        <button title="add potential link" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'addLink'">Add potential link
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="false">
+                            <div class="controls-container is-flex is-justify-content-center is-align-items-center">
+                                <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i
+                                        alt="stop" class="fas fa-stop"></i></button>
+                                <template x-if="selectedOperation.state ==='running'">
+                                    <button class="button no-style is-larger"
+                                            x-on:click="updateOperationState('paused')"><i
+                                            alt="pause" class="fas fa-pause-circle"></i></button>
+                                </template>
+                                <template x-if="selectedOperation.state !== 'running'">
+                                    <button class="button no-style is-larger"
+                                            x-on:click="updateOperationState('running')">
+                                        <i alt="run" class="fas fa-play-circle"></i></button>
+                                </template>
+                                <button class="button no-style is-medium"
+                                        x-on:click="updateOperationState('run_one_link')">
+                                    <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
+                            </div>
+                        </div>
+
+                        <div class="log-container">
+                            <template x-if="selectedOperation.chain">
+                                <table class="table">
+                                    <thead>
+                                    <tr class="table-header">
+                                        <th class="decideColumn">Decide / Status</th>
+                                        <th title="Link Status Indicator"></th>
+                                        <th>Link Information</th>
+                                        <!--                                        <th>Agent</th>-->
+                                        <th title="Link Details"></th>
+                                    </tr>
+                                    </thead>
+                                    <template x-for="(link, index) in selectedOperation.chain">
+                                        <tbody :key="index">
+                                        <tr x-bind:id="link.id" class="success">
+                                            <td class="decideColumn">
+                                                <span x-text="link.decide"></span>
+                                                <span>/</span>
+                                                <span x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
+                                            </td>
+                                            <td class="linkStatusColumn">
+                                                <span x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
+                                                      x-bind:class="'linkStatus status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"></span>
+                                            </td>
+                                            <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '') + ' run on agent #'+link.paw"></td>
+                                            <!--                                            <td x-text="'agent#'+link.paw">-->
+                                            <td x-show="false" class="linkActionsColumn">
+                                                <span>
+                                                    <template x-if="link.facts.length > 0">
+                                                        <button title="show facts" class="button no-style"
+                                                                x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">
+                                                            <i class="fas fa-star facts"></i>
+                                                        </button>
+                                                    </template>
+                                                    <template x-if="link.facts.length < 1">
+                                                        <button disabled class="button no-style" title="no facts"><i
+                                                                class="far fa-star no-facts"></i></button>
+                                                    </template>
+                                                </span>
+                                                <span>
+                                                    <template x-if="link.status === -5">
+                                                        <button title="remove link" class="button no-style"
+                                                                x-on:click="updateLinkState(link.id, -3)"><i
+                                                                class="fas fa-plus"></i></button>
+                                                    </template>
+                                                    <template
+                                                            x-if="!(link.collect || link.status <= -4) || link.status === -1">
+                                                        <button title="remove link" class="button no-style"
+                                                                x-on:click="updateLinkState(link.id, -2)"><i
+                                                                class="fas fa-trash"></i></button>
+                                                        </button>
+                                                    </template>
+                                                </span>
+                                                <template x-if="link.status === -1">
+                                                    <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === link.id ? 'selected' : '') ">
+                                                        <button title="edit command" class="button no-style"
+                                                                x-on:click="showLinkEditDropdown = (showLinkEditDropdown === link.id) ? null : link.id"><i
+                                                                x-bind:class="(showLinkEditDropdown === link.id) ? 'expanded' : 'collapsed'"
+                                                                class="fas fa-pencil-alt editCommand"></i></button>
+                                                    </span>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                        <tr x-show="false" class="linkEditCommandRow"
+                                            x-show="showLinkEditDropdown === link.id">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td x-init="editedCommand = editedCommand ? editedCommand : b64DecodeUnicode(link.command)">
+                                                <label for="editedCommand"></label>
+                                                <textarea id="editedCommand"
+                                                          class="code"
+                                                          contenteditable
+                                                          x-model="editedCommand"
+                                                          spellcheck="false"></textarea>
+                                                <div class="linkEditControls">
+                                                    <button class="button is-primary is-small"
+                                                            x-on:click="updateLinkState(link.id, -3, editedCommand); showLinkEditDropdown = null">
+                                                        Update
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </template>
+                                </table>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+        </div>
 
         <!--    MODALS      -->
         <template x-if="openModal">
@@ -955,6 +983,18 @@
 </script>
 
 <style>
+    .operation-menu-links {
+        color: white;
+        width: fit-content;
+        padding: 1rem 0;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .operation-menu-links:hover {
+        transform: none !important;
+    }
+
     .modal-card {
         max-height: 90vh;
         overflow-y: scroll;
@@ -1162,7 +1202,7 @@
 
 
     .log-container {
-        background-color: black;
+        /*background-color: black;*/
         border-radius: 5px;
         margin-top: 1rem;
         padding: 2rem 1.3rem 4rem;
@@ -1170,14 +1210,15 @@
     }
 
     .log-container table {
-        background-color: black;
+        /*background-color: black;*/
+        background-color: inherit;
     }
 
     .log-container table tr th {
-        color: #e6e6e6;
         font-weight: 400;
         font-size: 0.75rem;
-
+        border-bottom: none;
+        color: gray;
     }
 
     .log-container table tbody tr:hover {
@@ -1220,9 +1261,14 @@
         color: gray;
     }
 
-    i.editCommand::after {
+    i.editCommand.collapsed::after {
         font-size: 5pt;
         content: "▼";
+    }
+
+    i.editCommand.expanded::after {
+        font-size: 5pt;
+        content: "▲";
     }
 
     i sub {
@@ -1237,7 +1283,11 @@
     .log-container table tbody td {
         vertical-align: middle;
         border: none;
-        min-height: 3.5rem;
+        height: 8em;
+    }
+
+    .log-container table th.header {
+        border-bottom: none;
     }
 
     .log-container .decideColumn {
@@ -1297,6 +1347,7 @@
         content: "";
         display: inline-block;
         position: absolute;
+        margin-left: 10px;
     }
 
     table tbody:last-child td span.linkStatus::before {
@@ -1307,12 +1358,12 @@
     table tbody td span.linkStatus::after {
         position: relative;
         left: -5px;
-        top: 22px;
+        top: 50px;
         display: block;
         background: black;
         border-radius: 50%;
-        height: 0.75em;
-        width: 0.75em;
+        height: 2em;
+        width: 2em;
         content: "";
         box-shadow: 0 0 0 0.2em #555; /*queued*/
     }
