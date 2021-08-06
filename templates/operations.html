@@ -1,4 +1,4 @@
-<div x-data="alpineOperations()" x-init="getOperations()">
+<div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html">
     <div>
         <div>
             <div>
@@ -9,10 +9,11 @@
             </div>
             <hr>
         </div>
-        <div class="columns">
-            <div class="column is-one-quarter is-flex-direction-column">
+        <!--        <div class="columns">-->
+        <div>
+            <div class="is-flex-direction-column">
                 <div class="columns">
-                    <div class="column is-flex is-justify-content-space-between is-flex-direction-column">
+                    <div class="column is-flex is-one-quarter is-justify-content-space-between is-flex-direction-column">
                         <label for="op-search">Search operations:</label>
                         <div class="is-flex is-align-items-center">
                             <i class="fas fa-search"></i>
@@ -25,6 +26,10 @@
                                 x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
                         <button title="download event logs" class="button is-primary is-small ml-2"
                                 x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
+                        </button>
+                        <button type="button" title="add operation" class="ml-2 button is-primary is-small"
+                                x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
+                            Add new operation
                         </button>
                         <!--                        TODO add modal to download button-->
                         <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
@@ -45,22 +50,22 @@
                         <!--                        </div>-->
                     </div>
                 </div>
-                <div class="is-flex is-flex-direction-column">
-                    <button type="button" title="add operation" class="button is-primary is-small"
-                            x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
-                        Add new operation
-                    </button>
+                <div class="is-flex is-flex-direction-row is-justify-content-flex-start">
                     <template x-for="op in operations">
-                        <button class="no-style operation-menu-links"
+                        <button class="no-style operation-menu-links mr-2"
                                 :key="op.id"
-                                x-text="`${op.name} - ${op.start}`"
-                                x-on:click="selectedOperationID = op.id; getOperation()"></button>
+                                x-on:click="selectedOperationID = op.id; getOperation()">
+                            <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
+                            <i class="fas fa-cog"></i>
+<!--                            <i style="position: relative;left: -32px;top: -8px;" class="fas fa-folder"><span x-text="op.chain?.length"></span></i>-->
+                            <span x-text="op.name"></span>
+                        </button>
                     </template>
                 </div>
             </div>
 
 
-            <div class="column">
+            <div class="">
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
                         <div x-show="false" class="log-container">
@@ -668,6 +673,86 @@
         '124': 'timeout'
     };
 
+    // https://stackoverflow.com/questions/7641791/javascript-library-for-human-friendly-relative-date-formatting
+    function getHumanFriendlyTime(date) {
+        if (!date) return '';
+        // Make a fuzzy time
+        let delta = Math.round((+new Date - date) / 1000);
+
+        let minute = 60,
+            hour = minute * 60,
+            day = hour * 24;
+
+        let fuzzy;
+
+        if (delta < 30) {
+            fuzzy = 'just now';
+        } else if (delta < minute) {
+            fuzzy = delta + ' seconds ago';
+        } else if (delta < 2 * minute) {
+            fuzzy = 'a minute ago'
+        } else if (delta < hour) {
+            fuzzy = Math.floor(delta / minute) + ' minutes ago.';
+        } else if (Math.floor(delta / hour) === 1) {
+            fuzzy = '1 hour ago'
+        } else if (delta < day) {
+            fuzzy = Math.floor(delta / hour) + ' hours ago.';
+        } else if (delta < day * 2) {
+            fuzzy = 'yesterday';
+        } else if (delta < day * 3) {
+            fuzzy = '3 days ago'
+        } else {
+            let split = date.split('-')[0];
+            let hDate = split[2];
+            let hMonth = Number(split[1]);
+
+            switch (hMonth) {
+                case 0:
+                    hMonth = 'Jan';
+                    break;
+                case 1:
+                    hMonth = 'Feb';
+                    break;
+                case 2:
+                    hMonth = 'Mar';
+                    break;
+                case 3:
+                    hMonth = 'Apr';
+                    break;
+                case 4:
+                    hMonth = 'May';
+                    break;
+                case 5:
+                    hMonth = 'Jun';
+                    break;
+                case 6:
+                    hMonth = 'Jul';
+                    break;
+                case 7:
+                    hMonth = 'Aug';
+                    break;
+                case 8:
+                    hMonth = 'Sep';
+                    break;
+                case 9:
+                    hMonth = 'Oct';
+                    break;
+                case 10:
+                    hMonth = 'Nov';
+                    break;
+                case 11:
+                    hMonth = 'Dec';
+                    break;
+                default:
+                    hMonth = '';
+                    break;
+            }
+
+            fuzzy = hMonth + ' ' + hDate;
+        }
+        return fuzzy;
+    }
+
     function alpineOperations() {
         return {
             agentGroups: `{{ groups | tojson }}`.toString().replace(/["\[\]]/g, '').split(','),
@@ -985,14 +1070,39 @@
 <style>
     .operation-menu-links {
         color: white;
-        width: fit-content;
-        padding: 1rem 0;
+        margin: 1rem 2em;
         text-align: left;
         cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 5em;
+        flex-flow: column wrap;
+    }
+
+    .operation-menu-links .readable-time {
+        color: gray;
+    }
+
+    .operation-menu-links i {
+        font-size: 4em;
+    }
+
+    .operation-menu-links i span {
+        position: relative;
+        left: -35px;
+        top: -7px;
+        font-size: 0.5em;
+        color: #8B0000;
+    }
+
+    .operation-menu-links i span:last-child {
+        position: relative;
+        left: -5px;
     }
 
     .operation-menu-links:hover {
-        transform: none !important;
+        /*transform: none !important;*/
     }
 
     .modal-card {
@@ -1343,7 +1453,7 @@
     table tbody td span.linkStatus::before {
         width: 2px;
         height: 140px;
-        background-color: gray;
+        background-color: #8B0000;
         content: "";
         display: inline-block;
         position: absolute;
