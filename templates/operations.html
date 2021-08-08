@@ -13,24 +13,28 @@
         <div>
             <div class="is-flex-direction-column">
                 <div class="columns">
-                    <div class="column is-flex is-one-quarter is-justify-content-space-between is-flex-direction-column">
-                        <label for="op-search">Search operations:</label>
-                        <div class="is-flex is-align-items-center">
+                    <div class="column is-flex is-one-fifth is-justify-content-space-between is-flex-direction-column">
+                        <div class="is-flex is-align-items-center search-box">
                             <i class="fas fa-search"></i>
-                            <input id="op-search" placeholder="Operation name:" x-on:change="console.log('inputted', $el.value); operations = operations.filter((op) => op.name.includes($el.value));">
-                            <i class="fas fa-close"></i>
+                            <input id="op-search"
+                                   placeholder="Operation name"
+                                   x-on:keyup="filterOperations($el.value)">
+                            <i class="fas fa-times"></i>
                         </div>
+                        <label class="is-size-7" for="op-search">
+                            <em x-text="searchInput ? ('searching: ' + searchInput) : 'search operations'"></em>
+                        </label>
                     </div>
-                    <div class="column pl-0 is-flex is-align-items-flex-end">
-                        <button type="button" title="quick add operation" class="ml-2 button is-primary is-small"
-                                x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
+                    <div class="column pl-0 is-flex is-align-content-flex-start">
+                        <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button" title="quick add operation" class="button is-primary is-small"
+                                x-on:click="handleStartOperation(true)"><i class="pr-1 fas fa-plus"></i>
                             Quick add operation
                         </button>
                         <button type="button" title="add operation" class="ml-2 button is-primary is-small"
                                 x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
                             Add new operation
                         </button>
-                        <button type="button" title="delete operation" class="button is-primary is-small"
+                        <button type="button" title="delete operation" class="ml-2 button is-primary is-small"
                                 x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
                         <button title="download event logs" class="button is-primary is-small ml-2"
                                 x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
@@ -55,7 +59,7 @@
                     </div>
                 </div>
                 <div class="is-flex is-flex-direction-row is-justify-content-flex-start">
-                    <template x-for="op in operations">
+                    <template x-for="op in filteredOperations">
                         <button class="no-style operation-menu-links mr-2"
                                 :key="op.id"
                                 x-on:click="selectedOperationID = op.id; getOperation()">
@@ -235,7 +239,8 @@
                                                 <template x-if="!selectedLinkFacts">
                                                     <p>No facts available.</p>
                                                 </template>
-                                                <p x-show="selectedLinkCommand">Command: <em x-text="selectedLinkCommand"></em></p>
+                                                <p x-show="selectedLinkCommand">Command: <em
+                                                        x-text="selectedLinkCommand"></em></p>
                                             </td>
 
                                         </tr>
@@ -809,6 +814,8 @@
                 'schedule': false
             },
             operations: [],
+            filteredOperations: [],
+            searchInput: '',
             startOperation: {
                 index: "operations",
                 name: "",
@@ -860,6 +867,7 @@
             getOperations() {
                 restRequest('GET', {}, (res) => {
                     this.operations = JSON.parse(res);
+                    this.filterOperations(this.searchInput);
                 }, endpoint);
             },
 
@@ -915,7 +923,8 @@
                 });
             },
 
-            handleStartOperation() {
+            handleStartOperation(isQuickAdd = false) {
+                if (isQuickAdd) this.startOperation.name = this.searchInput;
                 if (!this.validateJitter(this.startOperation.jitter)) return;
                 if (!this.startOperation.name) {
                     toast('Error: Operation name field is empty.');
@@ -1092,6 +1101,12 @@
                 return true;
             },
 
+            filterOperations(userInput) {
+                this.searchInput = userInput;
+                console.log('inputted', userInput);
+                this.filteredOperations = this.operations.filter((op) => op.name.includes(userInput));
+            },
+
             filterAbilities() {
                 console.log('filterAbilities called', this.potentialLink);
                 this.filteredLinksList = this.potentialLink.agent.links.filter((link) => {
@@ -1106,6 +1121,31 @@
 </script>
 
 <style>
+    .search-box i {
+        background-color: #e6e6e6;
+        color: gray;
+        height: 30px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-box i:first-child {
+        border-radius: 2px 0 0 2px;
+    }
+
+    .search-box i:last-child {
+        border-radius: 0 2px 2px 0;
+    }
+
+    .search-box input {
+        height: 30px;
+        padding: 5px;
+        border: none;
+        width: 100%;
+    }
+
     .operation-menu-links {
         color: white;
         margin: 1rem 2em;
