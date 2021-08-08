@@ -18,8 +18,9 @@
                             <i class="fas fa-search"></i>
                             <input id="op-search"
                                    placeholder="Operation name"
+                                   x-ref="search"
                                    x-on:keyup="filterOperations($el.value)">
-                            <i class="fas fa-times"></i>
+                            <i class="fas fa-times" x-on:click="filterOperations(''); searchInput = ''; $refs.search.value=''"></i>
                         </div>
                         <label class="is-size-7" for="op-search">
                             <em x-text="searchInput ? ('searching: ' + searchInput) : 'search operations'"></em>
