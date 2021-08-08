@@ -215,6 +215,25 @@
                                             <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '') + ' run on agent #'+link.paw"></td>
                                             <!--                                            <td x-text="'agent#'+link.paw">-->
 
+                                            <td x-show="selectedLink === link">
+                                                <template x-if="selectedLinkOutput">
+                                                    <div class="mb-5">
+                                                        <p>Output: </p>
+                                                        <code x-text="selectedLinkOutput"></code>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!selectedLinkOutput">
+                                                    <p>No output available.</p>
+                                                </template>
+                                                <template x-for="fact in selectedLinkFacts">
+                                                    <p class="highlight" x-text="fact"></p>
+                                                </template>
+                                                <template x-if="!selectedLinkFacts">
+                                                    <p>No facts available.</p>
+                                                </template>
+                                                <p x-show="selectedLinkCommand">Command: <em x-text="selectedLinkCommand"></em></p>
+                                            </td>
+
                                         </tr>
                                         <tr x-show="false" class="linkEditCommandRow"
                                             x-show="showLinkEditDropdown === link.id">
@@ -1248,7 +1267,7 @@
 
     /*END MODAL FORM STYLE*/
 
-    .modal-card code, .code {
+    .modal-card code, table code {
         color: #ff8181;
         background-color: #262626;
     }
