@@ -136,7 +136,6 @@
                                     </label>
                                 </div>
 
-
                                 <div class="my-3">
                                     <button title="add manual command" class="button is-primary is-small ml-2"
                                             x-on:click="openModal = 'addCommand'">Add manual command
@@ -147,6 +146,45 @@
                                 </div>
 
                             </div>
+                        </div>
+
+
+                        <div class="my-3 is-flex is-flex-direction-row is-justify-content-flex-ends">
+                            <!--                            <span>-->
+                            <!--                                <template x-if="link.facts.length > 0">-->
+                            <!--                                    <button title="show facts" class="button no-style"-->
+                            <!--                                            x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">-->
+                            <!--                                        <i class="fas fa-star facts"></i>-->
+                            <!--                                    </button>-->
+                            <!--                                </template>-->
+                            <!--                                <template x-if="link.facts.length < 1">-->
+                            <!--                                    <button disabled class="button no-style" title="no facts"><i-->
+                            <!--                                            class="far fa-star no-facts"></i></button>-->
+                            <!--                                </template>-->
+                            <!--                            </span>-->
+                            <span>
+                                <button title="add link"
+                                        x-bind:disabled="link.status === -5"
+                                        class="button no-style"
+                                        x-on:click="updateLinkState(link.id, -3)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button title="remove link"
+                                        class="button no-style"
+                                        x-bind:disabled="!(link.collect || link.status <= -4) || link.status === -1"
+                                        x-on:click="updateLinkState(link.id, -2)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </span>
+                            <!--                                <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === link.id ? 'selected' : '') ">-->
+                            <button title="edit command"
+                                    class="button no-style"
+                                    x-bind:disabled="link.status === -1"
+                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === link.id) ? null : link.id">
+                                <i x-bind:class="(showLinkEditDropdown === link.id) ? 'expanded' : 'collapsed'"
+                                   class="fas fa-pencil-alt editCommand"></i>
+                            </button>
+                            <!--                                </span>-->
                         </div>
 
                         <div class="log-container">
@@ -163,7 +201,8 @@
                                     </thead>
                                     <template x-for="(link, index) in selectedOperation.chain">
                                         <tbody :key="index">
-                                        <tr x-bind:id="link.id" class="success">
+                                        <tr x-bind:id="link.id" class="success" x-on:click="selectedLink"
+                                            x-on:click="selectedLink = link; getResults(link.id);">
                                             <td class="decideColumn">
                                                 <span x-text="link.decide"></span>
                                                 <span x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
@@ -174,42 +213,7 @@
                                             </td>
                                             <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '') + ' run on agent #'+link.paw"></td>
                                             <!--                                            <td x-text="'agent#'+link.paw">-->
-                                            <td x-show="false" class="linkActionsColumn">
-                                                <span>
-                                                    <template x-if="link.facts.length > 0">
-                                                        <button title="show facts" class="button no-style"
-                                                                x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">
-                                                            <i class="fas fa-star facts"></i>
-                                                        </button>
-                                                    </template>
-                                                    <template x-if="link.facts.length < 1">
-                                                        <button disabled class="button no-style" title="no facts"><i
-                                                                class="far fa-star no-facts"></i></button>
-                                                    </template>
-                                                </span>
-                                                <span>
-                                                    <template x-if="link.status === -5">
-                                                        <button title="remove link" class="button no-style"
-                                                                x-on:click="updateLinkState(link.id, -3)"><i
-                                                                class="fas fa-plus"></i></button>
-                                                    </template>
-                                                    <template
-                                                            x-if="!(link.collect || link.status <= -4) || link.status === -1">
-                                                        <button title="remove link" class="button no-style"
-                                                                x-on:click="updateLinkState(link.id, -2)"><i
-                                                                class="fas fa-trash"></i></button>
-                                                        </button>
-                                                    </template>
-                                                </span>
-                                                <template x-if="link.status === -1">
-                                                    <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === link.id ? 'selected' : '') ">
-                                                        <button title="edit command" class="button no-style"
-                                                                x-on:click="showLinkEditDropdown = (showLinkEditDropdown === link.id) ? null : link.id"><i
-                                                                x-bind:class="(showLinkEditDropdown === link.id) ? 'expanded' : 'collapsed'"
-                                                                class="fas fa-pencil-alt editCommand"></i></button>
-                                                    </span>
-                                                </template>
-                                            </td>
+
                                         </tr>
                                         <tr x-show="false" class="linkEditCommandRow"
                                             x-show="showLinkEditDropdown === link.id">
@@ -1443,6 +1447,7 @@
         flex-flow: column wrap;
         justify-content: center;
     }
+
     table tbody td.linkStatusColumn {
         padding: 0;
         vertical-align: top;
