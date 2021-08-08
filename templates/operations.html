@@ -205,7 +205,7 @@
                                         <th title="Link Status Indicator"></th>
                                         <th>Link Information</th>
                                         <!--                                        <th>Agent</th>-->
-                                        <th title="Link Details"></th>
+                                        <th title="Link Details">Link Output</th>
                                     </tr>
                                     </thead>
                                     <template x-for="(link, index) in selectedOperation.chain">
@@ -221,9 +221,11 @@
                                                 <span x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
                                                       x-bind:class="'linkStatus status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"></span>
                                             </td>
-                                            <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '') + ' run on agent #'+link.paw"></td>
+                                            <td x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '') + ' run on Agent: #'+link.paw"></td>
                                             <!--                                            <td x-text="'agent#'+link.paw">-->
-
+                                            <td x-show="index === 0 && !selectedLink">
+                                                <em>Click on a link to show more details.</em>
+                                            </td>
                                             <td x-show="selectedLink === link">
                                                 <template x-if="selectedLinkOutput">
                                                     <div class="mb-5">
