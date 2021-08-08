@@ -202,7 +202,7 @@
                                     <template x-for="(link, index) in selectedOperation.chain">
                                         <tbody :key="index">
                                         <tr x-bind:id="link.id"
-                                            class="success"
+                                            x-bind:class="selectedLink === link ? 'selected' : ''"
                                             x-on:click="selectedLink = link; console.log('new link', selectedLink, link); getResults(link.id);">
                                             <td class="decideColumn">
                                                 <span x-text="link.decide"></span>
@@ -1347,7 +1347,7 @@
         color: gray;
     }
 
-    .log-container table tbody tr:hover {
+    .log-container table tbody tr:hover, .log-container table tbody tr.selected {
         background-color: rgba(255, 255, 255, 0.1);
     }
 
