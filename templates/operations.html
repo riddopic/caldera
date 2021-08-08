@@ -55,10 +55,10 @@
                         <button class="no-style operation-menu-links mr-2"
                                 :key="op.id"
                                 x-on:click="selectedOperationID = op.id; getOperation()">
-                            <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
                             <i class="fas fa-cog"></i>
-<!--                            <i style="position: relative;left: -32px;top: -8px;" class="fas fa-folder"><span x-text="op.chain?.length"></span></i>-->
+                            <!--                            <i style="position: relative;left: -32px;top: -8px;" class="fas fa-folder"><span x-text="op.chain?.length"></span></i>-->
                             <span x-text="op.name"></span>
+                            <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
                         </button>
                     </template>
                 </div>
@@ -68,74 +68,84 @@
             <div class="">
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
-                        <div x-show="false" class="log-container">
-                            <div>
-                                <div class="is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center mx-2">
-                                    <div>
+                        <div class="navbar-divider"></div>
+                        <div class="columns">
+                            <div class="column is-flex is-flex-direction-column is-justify-content-center">
+                                <div class="is-flex is-flex-direction-row is-justify-content-center mt-2 ml-5">
+                                    <div class="mr-6">
                                         <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
                                         <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
                                     </div>
-                                    <div>
+                                    <div class="mr-6">
                                         <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
                                         <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
                                     </div>
-                                    <div>
+                                    <div class="mr-6">
                                         <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
                                         <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
                                     </div>
                                 </div>
-                                <div class="columns is-flex is-flex-direction-row flex-wrap is-justify-content-space-between align-center">
-                                    <label class="column is-one-third" for="operation-obfuscator"
-                                           title="choose obfuscation method">
-                                        <select id="operation-obfuscator" x-model="selectedOperation.obfuscator"
-                                                x-on:change="updateObfuscator()">
-                                            {% for o in obfuscators %}
-                                            <option value="{{ o.name|e }}">Use {{ o.name|e }} obfuscation</option>
-                                            {% endfor %}
-                                        </select>
-                                    </label>
-                                    <div class="toggleContainer">
-                                        <label class="toggleSwitch" for="toggleAutonomous">
-                                            <input type="checkbox" id="toggleAutonomous"
-                                                   x-model="selectedOperation.autonomous"
-                                                   x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
-                                                   x-on:change="updateOperationToggle()"/>
-                                            <span class="toggleSlider toggleSliderRound"
-                                                  x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
-                                        <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
-                                              x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
-                                </span>
-                                        </label>
-                                    </div>
-                                    <div class="column is-one-third is-flex is-flex-direction-row is-justify-content-flex-end">
-                                        <button title="add manual command" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addCommand'">Add manual command
-                                        </button>
-                                        <button title="add potential link" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addLink'">Add potential link
-                                        </button>
-                                    </div>
+                                <div class="controls-container is-flex is-justify-content-center is-align-items-center">
+                                    <button class="button no-style is-large"
+                                            x-on:click="updateOperationState('cleanup')"><i
+                                            alt="stop" class="fas fa-stop"></i></button>
+                                    <template x-if="selectedOperation.state ==='running'">
+                                        <button class="button no-style is-larger"
+                                                x-on:click="updateOperationState('paused')"><i
+                                                alt="pause" class="fas fa-pause-circle"></i></button>
+                                    </template>
+                                    <template x-if="selectedOperation.state !== 'running'">
+                                        <button class="button no-style is-larger"
+                                                x-on:click="updateOperationState('running')">
+                                            <i alt="run" class="fas fa-play-circle"></i></button>
+                                    </template>
+                                    <button class="button no-style is-medium"
+                                            x-on:click="updateOperationState('run_one_link')">
+                                        <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
                                 </div>
                             </div>
-                        </div>
 
-                        <div x-show="false">
-                            <div class="controls-container is-flex is-justify-content-center is-align-items-center">
-                                <button class="button no-style is-large" x-on:click="updateOperationState('cleanup')"><i
-                                        alt="stop" class="fas fa-stop"></i></button>
-                                <template x-if="selectedOperation.state ==='running'">
-                                    <button class="button no-style is-larger"
-                                            x-on:click="updateOperationState('paused')"><i
-                                            alt="pause" class="fas fa-pause-circle"></i></button>
-                                </template>
-                                <template x-if="selectedOperation.state !== 'running'">
-                                    <button class="button no-style is-larger"
-                                            x-on:click="updateOperationState('running')">
-                                        <i alt="run" class="fas fa-play-circle"></i></button>
-                                </template>
-                                <button class="button no-style is-medium"
-                                        x-on:click="updateOperationState('run_one_link')">
-                                    <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
+                            <div class="column is-flex is-flex-direction-column is-flex-wrap-wrap is-align-items-flex-end">
+                                <div>
+                                    <label for="operation-obfuscator"></label>
+                                    Obfuscation method:
+                                    </label>
+                                    <div class="is-flex is-flex-direction-row is-flex-wrap-wrap"
+                                         id="operation-obfuscator">
+                                        {% for o in obfuscators %}
+                                        <button x-bind:class="selectedOperation.obfuscator === `{{ o.name|e }}` ? 'selected' : ''"
+                                                class="no-style chip-select"
+                                                x-on:click="updateObfuscator(`{{ o.name|e }}`)">
+                                            {{ o.name|e }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="toggleContainer my-3">
+                                    <label class="toggleSwitch" for="toggleAutonomous">
+                                        <input type="checkbox" id="toggleAutonomous"
+                                               x-model="selectedOperation.autonomous"
+                                               x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
+                                               x-on:change="updateOperationToggle()"/>
+                                        <span class="toggleSlider toggleSliderRound"
+                                              x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
+                                                <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
+                                                      x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
+                                            </span>
+                                    </label>
+                                </div>
+
+
+                                <div class="my-3">
+                                    <button title="add manual command" class="button is-primary is-small ml-2"
+                                            x-on:click="openModal = 'addCommand'">Add manual command
+                                    </button>
+                                    <button title="add potential link" class="button is-primary is-small ml-2"
+                                            x-on:click="openModal = 'addLink'">Add potential link
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
 
@@ -156,7 +166,6 @@
                                         <tr x-bind:id="link.id" class="success">
                                             <td class="decideColumn">
                                                 <span x-text="link.decide"></span>
-                                                <span>/</span>
                                                 <span x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
                                             </td>
                                             <td class="linkStatusColumn">
@@ -963,8 +972,9 @@
                 });
             },
 
-            updateObfuscator() {
-                console.log('chosen obfusc', this.selectedOperation.obfuscator)
+            updateObfuscator(newObfuscator) {
+                console.log('chosen obfusc', newObfuscator, this.selectedOperation.obfuscator)
+                this.selectedOperation.obfuscator = newObfuscator;
                 restRequest('POST', {
                     'index': 'operation',
                     'op_id': this.selectedOperationID,
@@ -1086,6 +1096,7 @@
 
     .operation-menu-links i {
         font-size: 4em;
+        padding-bottom: 5px;
     }
 
     .operation-menu-links i span {
@@ -1357,6 +1368,24 @@
         box-shadow: none;
     }
 
+    button.chip-select {
+        border: 2px solid #8B0000;
+        border-radius: 24px;
+        color: white;
+        padding: 5px 12px;
+        cursor: pointer;
+        margin: 0.75em 0.75em 0 0;
+    }
+
+    button.chip-select:hover {
+        background-color: #8B0000;
+        transform: none !important;
+    }
+
+    button.chip-select.selected {
+        background-color: #8B0000;
+    }
+
     button.no-style:hover {
         border: none;
         color: white;
@@ -1386,7 +1415,7 @@
     }
 
     .controls-container button {
-        margin: 2rem;
+        margin: 0 2rem;
         padding: 0;
     }
 
@@ -1408,6 +1437,12 @@
         text-align: center !important;
     }
 
+    .log-container td.decideColumn {
+        padding: 0 1em;
+        display: flex;
+        flex-flow: column wrap;
+        justify-content: center;
+    }
     table tbody td.linkStatusColumn {
         padding: 0;
         vertical-align: top;
