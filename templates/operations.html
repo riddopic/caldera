@@ -17,19 +17,23 @@
                         <label for="op-search">Search operations:</label>
                         <div class="is-flex is-align-items-center">
                             <i class="fas fa-search"></i>
-                            <input id="op-search" placeholder="Operation name:">
+                            <input id="op-search" placeholder="Operation name:" x-on:change="console.log('inputted', $el.value); operations = operations.filter((op) => op.name.includes($el.value));">
                             <i class="fas fa-close"></i>
                         </div>
                     </div>
                     <div class="column pl-0 is-flex is-align-items-flex-end">
-                        <button type="button" title="delete operation" class="button is-primary is-small"
-                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
-                        <button title="download event logs" class="button is-primary is-small ml-2"
-                                x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
+                        <button type="button" title="quick add operation" class="ml-2 button is-primary is-small"
+                                x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
+                            Quick add operation
                         </button>
                         <button type="button" title="add operation" class="ml-2 button is-primary is-small"
                                 x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
                             Add new operation
+                        </button>
+                        <button type="button" title="delete operation" class="button is-primary is-small"
+                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
+                        <button title="download event logs" class="button is-primary is-small ml-2"
+                                x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
                         </button>
                         <!--                        TODO add modal to download button-->
                         <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
