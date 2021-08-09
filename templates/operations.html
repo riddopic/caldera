@@ -314,43 +314,119 @@
                                     </div>
                                     <div class="modal-form" x-show="openModalForm.basic">
                                         <div>
-                                            <label for="basic-groups">Groups:</label>
-                                            <div class="modal-form-fields" id="basic-groups">
-                                                <span>
-                                                    <input id="all-groups" value="" type="radio"
-                                                           x-model="startOperation.group" checked>
-                                                    <label for="all-groups">Use all groups</label>
-                                                </span>
-                                                <template x-for="(group, index) in agentGroups">
-                                                    <span>
-                                                        <input x-bind:id="index" type="radio" x-bind:value="group"
-                                                               x-model="startOperation.group">
-                                                        <label x-bind:for="index" x-text="group"></label>
-                                                    </span>
-                                                </template>
-                                            </div>
-                                        </div>
-                                        <div>
                                             <label for="basic-adversary">Adversary:</label>
                                             <div class="modal-form-fields" id="basic-adversary">
                                                 <select x-model="startOperation.adversary_id">
                                                     <option value="" selected>No adversary (manual)</option>
                                                     {% for adv in adversaries %}
-                                                    {% if adv.has_repeatable_abilities %}
-                                                    <option id="qflow-{{ adv.adversary_id|e }}"
+                                                    <option x-on:click="isSelectedAdversaryRepeatable = {{ adv.has_repeatable_abilities }}"
                                                             value="{{ adv.adversary_id|e }}">
                                                         {{ adv.name|e }}
                                                     </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="autonomous-planner">Planner:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="autonomous-planner" x-model="startOperation.planner">
+                                                    {% for p in planners %}
+                                                    {% if p.allow_repeatable_abilities %}
+                                                    <option data-allow-repeatable-abilities>
+                                                        {{ p.name|e }}
+                                                    </option>
                                                     {% else %}
-                                                    <option id="qflow-{{ adv.adversary_id|e }}"
-                                                            value="{{ adv.adversary_id|e }}">{{
-                                                        adv.name|e }}
+                                                    <option x-bind:disabled="isSelectedAdversaryRepeatable ? 'true' : null">
+                                                        {{ p.name|e }}
                                                     </option>
                                                     {% endif %}
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                         </div>
+                                        <div>
+                                            <label for="autonomous-source">Source:</label>
+                                            <div class="modal-form-fields" id="autonomous-source">
+                                                <select x-model="startOperation.source">
+                                                    {% for s in sources %}
+                                                    <option>{{ s.name|e }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="basic-groups">Groups:</label>
+                                            <div class="modal-form-fields"
+                                                 id="basic-groups">
+                                                <button class="no-style chip-select"
+                                                        x-bind:class="(startOperation.group === '') ? 'selected' : ''"
+                                                        x-on:click="startOperation.group = ''">
+                                                    all groups
+                                                </button>
+                                                <template x-for="(group, index) in agentGroups">
+                                                    <button :key="index"
+                                                            class="no-style chip-select"
+                                                            x-bind:class="(startOperation.group === group) ? 'selected' : ''"
+                                                            x-on:click="startOperation.group = group"
+                                                            x-text="group">
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-form-group-header">
+                                        <button type="button" class="button no-style heading pt-2"
+                                                x-on:click="openModalForm.advanced = !openModalForm.advanced"
+                                                x-bind:class="openModalForm.advanced ? 'expanded' : 'collapsed'">
+                                            <span>Advanced</span>
+                                            <span class="navbar-divider"></span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-form" x-show="openModalForm.advanced">
+                                        <div>
+                                            <label for="stealth-obfuscator">Obfuscator:</label>
+                                            <div class="modal-form-fields" id="stealth-obfuscator">
+                                                <select x-model="startOperation.obfuscator">
+                                                    {% for o in obfuscators %}
+                                                    {% if loop.first %}
+                                                    <option value="{{ o.name|e }}" selected>{{ o.name|e }}
+                                                        obfuscation
+                                                    </option>
+                                                    {% else %}
+                                                    <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation
+                                                    </option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="autonomous-autonomous">Autonomous:</label>
+                                            <div class="modal-form-fields" id="autonomous-autonomous">
+                                                <input type="radio" id="run-autonomously"
+                                                       x-model="startOperation.autonomous" value="1" checked>
+                                                <label for="run-autonomously">Run autonomously</label>
+                                                <input type="radio" id="manual-approval"
+                                                       x-model="startOperation.autonomous" value="0">
+                                                <label for="manual-approval">Require manual approval</label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="autonomous-use_learning_parsers">Parser:</label>
+                                            <div class="modal-form-fields" id="autonomous-use_learning_parsers">
+                                                <input type="radio" id="parsers-default"
+                                                       x-model="startOperation.use_learning_parsers" value="1" checked>
+                                                <label for="parsers-default">Use default parsers</label>
+                                                <input type="radio" id="parsers-no_default"
+                                                       x-model="startOperation.use_learning_parsers" value="0">
+                                                <label for="parsers-no_default">Do not use default parsers</label>
+                                            </div>
+                                        </div>
+
                                         <div>
                                             <label for="basic-keep">Keep:</label>
                                             <div class="modal-form-fields" id="basic-keep">
@@ -378,127 +454,40 @@
                                                 <label for="pause-on-start">Pause on start</label>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="modal-form-group-header">
-                                        <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm.autonomous = !openModalForm.autonomous"
-                                                x-bind:class="openModalForm.autonomous ? 'expanded' : 'collapsed'">
-                                            <span>Autonomous</span>
-                                            <span class="navbar-divider"></span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-form" x-show="openModalForm.autonomous">
-                                        <div>
-                                            <label for="autonomous-autonomous">Autonomous:</label>
-                                            <div class="modal-form-fields" id="autonomous-autonomous">
-                                                <input type="radio" id="run-autonomously"
-                                                       x-model="startOperation.autonomous" value="1" checked>
-                                                <label for="run-autonomously">Run autonomously</label>
-                                                <input type="radio" id="manual-approval"
-                                                       x-model="startOperation.autonomous" value="0">
-                                                <label for="manual-approval">Require manual approval</label>
-                                            </div>
-                                        </div>
 
-                                        <div>
-                                            <label for="autonomous-planner">Planner:</label>
-                                            <div class="modal-form-fields" id="autonomous-planner">
-                                                {% for p in planners %}
-                                                {% if p.name == "atomic" %}
-                                                <input type="radio" id="{{ p.name|e }}" x-model="startOperation.planner"
-                                                       value="{{ p.name|e }}"
-                                                       checked>
-                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
-                                                {% elif p.allow_repeatable_abilities %}
-                                                <input type="radio" id="{{ p.name|e }}"
-                                                       value="{{ p.name|e }}"
-                                                       x-model="startOperation.planner">
-                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
-                                                {% else %}
-                                                <input type="radio" id="{{ p.name|e }}"
-                                                       value="{{ p.name|e }}"
-                                                       x-model="startOperation.planner">
-                                                <label for="{{ p.name|e }}">{{ p.name|e }}</label>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="autonomous-source">Source:</label>
-                                            <div class="modal-form-fields" id="autonomous-source">
-                                                {% for s in sources %}
-                                                {% if loop.first %}
-                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}"
-                                                       x-model="startOperation.source"
-                                                       checked>
-                                                <label for="{{ s.name|e }}">{{ s.name|e
-                                                    }}</label>
-                                                {% else %}
-                                                <input type="radio" value="{{ s.name|e }}" id="{{ s.name|e }}"
-                                                       x-model="startOperation.source">
-                                                <label for="{{ s.name|e }}">{{ s.name|e
-                                                    }}</label>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="autonomous-use_learning_parsers">Parser:</label>
-                                            <div class="modal-form-fields" id="autonomous-use_learning_parsers">
-                                                <input type="radio" id="parsers-default"
-                                                       x-model="startOperation.use_learning_parsers" value="1" checked>
-                                                <label for="parsers-default">Use default parsers</label>
-                                                <input type="radio" id="parsers-no_default"
-                                                       x-model="startOperation.use_learning_parsers" value="0">
-                                                <label for="parsers-no_default">Do not use default parsers</label>
-                                            </div>
-                                        </div>
+
                                         <div>
                                             <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs):</label>
-                                            <div class="modal-form-fields" id="autonomous-cleanup_timeout">
-                                                <input class="input" x-model="startOperation.timeout" type="number"
+                                            <div class="modal-form-fields">
+                                                <input id="autonomous-cleanup_timeout" class="input" x-model="startOperation.timeout" type="number"
                                                        placeholder="30" value="30" min="0" max="300"
                                                        onchange="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="modal-form-group-header">
-                                        <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm.stealth = !openModalForm.stealth"
-                                                x-bind:class="openModalForm.stealth ? 'expanded' : 'collapsed'">
-                                            <span>Stealth</span>
-                                            <span class="navbar-divider"></span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-form" x-show="openModalForm.stealth">
-                                        <div>
-                                            <label for="stealth-obfuscator">Obfuscator:</label>
-                                            <div class="modal-form-fields" id="stealth-obfuscator">
-                                                <select x-model="startOperation.obfuscator">
-                                                    {% for o in obfuscators %}
-                                                    {% if loop.first %}
-                                                    <option value="{{ o.name|e }}" selected>{{ o.name|e }}
-                                                        obfuscation
-                                                    </option>
-                                                    {% else %}
-                                                    <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation
-                                                    </option>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </select>
+                                                <button type="button" class="no-style reset" title="reset to default" x-on:click="startOperation.timeout = 30;">reset</button>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label for="stealth-jitter">Jitter (min/max) sec:</label>
+                                            <label for="stealth-jitterMin" for="stealth-jitterMax">Jitter (min/max)
+                                                sec:</label>
                                             <div class="modal-form-fields">
-                                                <input class="input" x-model="startOperation.jitter"
-                                                       id="stealth-jitter" value="4/8" type="text"
+                                                <input class="input"
+                                                       x-on:change="validateJitter(jitterMin+'/'+jitterMax)"
+                                                       x-model="jitterMin"
+                                                       id="stealth-jitterMin"
+                                                       type="number"
                                                        required
-                                                       pattern="[0-9\/0-9]*"
-                                                       placeholder="4/8"/>
+                                                       pattern="[0-9]*"
+                                                       placeholder="4"/>
+                                                <span>/</span>
+                                                <input class="input"
+                                                       x-on:change="validateJitter(jitterMin+'/'+jitterMax)"
+                                                       x-model="jitterMax"
+                                                       id="stealth-jitterMax"
+                                                       type="number"
+                                                       required
+                                                       pattern="[0-9]*"
+                                                       placeholder="8"/>
+                                                <button type="button" class="no-style reset" title="reset to default" x-on:click="jitterMin = 4; jitterMax = 8;">reset</button>
                                             </div>
                                         </div>
                                         <div>
@@ -808,6 +797,7 @@
             selectedOperationID: null,
             selectedOperation: null,
             selectedAgentIndex: null,
+            isSelectedAdversaryRepeatable: false,
             selectedLink: null,
             selectedLinkOutput: null,
             selectedLinkFacts: null,
@@ -816,9 +806,7 @@
             openModal: null,
             openModalForm: {
                 'basic': false,
-                'autonomous': false,
-                'stealth': false,
-                'schedule': false
+                'advanced': false
             },
             operations: [],
             filteredOperations: [],
@@ -839,6 +827,8 @@
                 jitter: "4/8",
                 visibility: "50",
             },
+            jitterMin: 4,
+            jitterMax: 8,
             manualCommand: {
                 index: "manual_command",
                 agent: "",
@@ -1105,6 +1095,7 @@
                     return false;
                 }
 
+                this.startOperation.jitter = newValue;
                 return true;
             },
 
@@ -1260,6 +1251,10 @@
         justify-content: flex-start;
         align-items: center;
         flex-flow: row wrap;
+    }
+
+    .modal-form-fields input[type=number] {
+        width: 75px;
     }
 
     .modal-form-fields input, .modal-form-fields select {
@@ -1460,8 +1455,18 @@
         box-shadow: none;
     }
 
+    button.no-style.reset {
+        padding: 0;
+        width: fit-content;
+    }
+
     button.no-style[disabled] {
         background-color: initial !important;
+    }
+
+    .modal-form-fields button.chip-select {
+        width: 90px;
+        margin: 0 0.75em;
     }
 
     button.chip-select {
