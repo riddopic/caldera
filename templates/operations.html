@@ -360,13 +360,15 @@
                                             <label for="basic-groups">Groups:</label>
                                             <div class="modal-form-fields"
                                                  id="basic-groups">
-                                                <button class="no-style chip-select"
+                                                <button type="button"
+                                                        class="no-style chip-select"
                                                         x-bind:class="(startOperation.group === '') ? 'selected' : ''"
                                                         x-on:click="startOperation.group = ''">
                                                     all groups
                                                 </button>
                                                 <template x-for="(group, index) in agentGroups">
-                                                    <button :key="index"
+                                                    <button type="button"
+                                                            :key="index"
                                                             class="no-style chip-select"
                                                             x-bind:class="(startOperation.group === group) ? 'selected' : ''"
                                                             x-on:click="startOperation.group = group"
@@ -389,18 +391,14 @@
                                         <div>
                                             <label for="stealth-obfuscator">Obfuscator:</label>
                                             <div class="modal-form-fields" id="stealth-obfuscator">
-                                                <select x-model="startOperation.obfuscator">
-                                                    {% for o in obfuscators %}
-                                                    {% if loop.first %}
-                                                    <option value="{{ o.name|e }}" selected>{{ o.name|e }}
-                                                        obfuscation
-                                                    </option>
-                                                    {% else %}
-                                                    <option value="{{ o.name|e }}">{{ o.name|e }} obfuscation
-                                                    </option>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </select>
+                                                {% for o in obfuscators %}
+                                                <button class="no-style chip-select"
+                                                        type="button"
+                                                        x-bind:class="startOperation.obfuscator === `{{ o.name|e }}` ? 'selected' : ''"
+                                                        x-on:click="startOperation.obfuscator = `{{ o.name|e }}`">
+                                                    {{ o.name|e }}
+                                                </button>
+                                                {% endfor %}
                                             </div>
                                         </div>
                                         <div>
@@ -1447,8 +1445,8 @@
     }
 
     .modal-form-fields button.chip-select {
-        width: 90px;
-        margin: 0 0.75em;
+        width: fit-content;
+        margin: 0.75em 0 0 0.75em;
     }
 
     button.chip-select {
