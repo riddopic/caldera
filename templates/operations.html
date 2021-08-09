@@ -501,24 +501,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-form-group-header">
-                                        <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm.schedule = !openModalForm.schedule"
-                                                x-bind:class="openModalForm.schedule ? 'expanded' : 'collapsed'">
-                                            <span>Schedule</span>
-                                            <span class="navbar-divider"></span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-form" x-show="openModalForm.schedule">
-                                        <div>
-                                            <label for="schedule-schedule">Schedule operation:</label>
-                                            <div class="modal-form-fields">
-                                                <input class="input" x-model="schedule"
-                                                       type="time"
-                                                       id="schedule-schedule" value="00:00">
-                                            </div>
-                                        </div>
-                                    </div>
                                 </section>
                             </div>
                         </template>
