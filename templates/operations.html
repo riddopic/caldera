@@ -135,29 +135,31 @@
                                     </div>
                                 </div>
 
-                                <div class="toggleContainer my-3">
-                                    <label class="toggleSwitch" for="toggleAutonomous">
-                                        <input type="checkbox" id="toggleAutonomous"
-                                               x-model="selectedOperation.autonomous"
-                                               x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
-                                               x-on:change="updateOperationToggle()"/>
-                                        <span class="toggleSlider toggleSliderRound"
-                                              x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
-                                                <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"
-                                                      x-text="Boolean(selectedOperation.autonomous) ? 'Autonomous' : 'Manual'"></span>
+                                <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
+                                    <div class="toggleContainer my-3">
+                                        <label for="toggleAutonomous">Autonomous</label>
+                                        <div class="toggleSwitch mx-2">
+                                            <input type="checkbox" id="toggleAutonomous"
+                                                   x-model="selectedOperation.autonomous"
+                                                   x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
+                                                   x-on:change="updateOperationToggle()"/>
+                                            <span class="toggleSlider toggleSliderRound"
+                                                  x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
+                                                <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
                                             </span>
-                                    </label>
-                                </div>
+                                        </div>
+                                        <label for="toggleAutonomous">Manual</label>
+                                    </div>
 
-                                <div class="my-3">
-                                    <button title="add manual command" class="button is-primary is-small ml-2"
-                                            x-on:click="openModal = 'addCommand'">Add manual command
-                                    </button>
-                                    <button title="add potential link" class="button is-primary is-small ml-2"
-                                            x-on:click="openModal = 'addLink'">Add potential link
-                                    </button>
+                                    <div class="my-3">
+                                        <button title="add manual command" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'addCommand'">Add manual command
+                                        </button>
+                                        <button title="add potential link" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'addLink'">Add potential link
+                                        </button>
+                                    </div>
                                 </div>
-
                             </div>
                         </div>
 
@@ -1179,19 +1181,6 @@
         padding-bottom: 5px;
     }
 
-    .operation-menu-links i span {
-        position: relative;
-        left: -35px;
-        top: -7px;
-        font-size: 0.5em;
-        color: #8B0000;
-    }
-
-    .operation-menu-links i span:last-child {
-        position: relative;
-        left: -5px;
-    }
-
     .operation-menu-links:hover {
         /*transform: none !important;*/
     }
@@ -1335,10 +1324,14 @@
         align-items: center;
     }
 
+    .toggleContainer label {
+        font-size: 0.75em;
+    }
+
     .toggleSwitch {
         position: relative;
         display: inline-block;
-        width: 140px;
+        width: 65px;
         height: 34px;
     }
 
@@ -1347,7 +1340,7 @@
     }
 
     .toggleSlider {
-        border: 1px solid white;
+        border: 3px solid white;
         position: absolute;
         cursor: pointer;
         top: 0;
@@ -1360,12 +1353,12 @@
     .toggleSlider::before {
         position: absolute;
         content: "";
-        height: 25px;
-        width: 25px;
+        height: 22px;
+        width: 22px;
         bottom: 4px;
-        background-color: white;
         transition: all 0.3s ease;
         left: 4px;
+        top: 3px;
     }
 
     .toggle-off {
@@ -1373,7 +1366,7 @@
     }
 
     .toggle-on {
-        background-color: green;
+        background-color: #339c3f;
     }
 
     .toggle-slider-on,
@@ -1388,10 +1381,12 @@
     }
 
     .toggle-on.toggleSlider.toggleSlider::before {
-        transform: translatex(105px);
+        background-color: white;
+        transform: translatex(30px);
     }
 
     .toggle-off.toggleSlider.toggleSlider::before {
+        background-color: white;
         transform: translatex(0px);
     }
 
@@ -1446,6 +1441,10 @@
         background-color: transparent;
         border: none;
         box-shadow: none;
+    }
+
+    button.no-style[disabled] {
+        background-color: initial !important;
     }
 
     button.chip-select {
