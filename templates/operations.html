@@ -20,14 +20,16 @@
                                    placeholder="Operation name"
                                    x-ref="search"
                                    x-on:keyup="filterOperations($el.value)">
-                            <i class="fas fa-times" x-on:click="filterOperations(''); searchInput = ''; $refs.search.value=''"></i>
+                            <i class="fas fa-times"
+                               x-on:click="filterOperations(''); searchInput = ''; $refs.search.value=''"></i>
                         </div>
                         <label class="is-size-7" for="op-search">
                             <em x-text="searchInput ? ('searching: ' + searchInput) : 'search operations'"></em>
                         </label>
                     </div>
                     <div class="column pl-0 is-flex is-align-content-flex-start">
-                        <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button" title="quick add operation" class="button is-primary is-small"
+                        <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button"
+                                title="quick add operation" class="button is-primary is-small"
                                 x-on:click="handleStartOperation(true)"><i class="pr-1 fas fa-plus"></i>
                             Quick add operation
                         </button>
@@ -61,11 +63,13 @@
                 </div>
                 <div class="is-flex is-flex-direction-row is-justify-content-flex-start">
                     <template x-for="op in filteredOperations">
-                        <button class="no-style operation-menu-links mr-2"
+                        <button class="no-style operation-menu-links"
+                                x-bind:title="op.name + ' has ' + op.chain.length + ' decisions'"
                                 :key="op.id"
                                 x-on:click="selectedOperationID = op.id; getOperation()">
-                            <i class="fas fa-cog"></i>
-                            <!--                            <i style="position: relative;left: -32px;top: -8px;" class="fas fa-folder"><span x-text="op.chain?.length"></span></i>-->
+                            <i x-show="selectedOperationID !== op.id" class="far fa-folder">
+                                <span class="decisionsIcon" x-text="op.chain.length"></span></i>
+                            <i x-show="selectedOperationID === op.id" class="far fa-folder-open"></i>
                             <span x-text="op.name"></span>
                             <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
                         </button>
@@ -77,7 +81,7 @@
             <div class="">
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
-                        <div class="navbar-divider"></div>
+                        <div class="navbar-divider my-5"></div>
                         <div class="columns">
                             <div class="column is-flex is-flex-direction-column is-justify-content-center">
                                 <div class="is-flex is-flex-direction-row is-justify-content-center mt-2 ml-5">
