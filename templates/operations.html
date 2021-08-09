@@ -162,39 +162,29 @@
                         </div>
 
 
-                        <div class="my-3 is-flex is-flex-direction-row is-justify-content-flex-ends">
-                            <!--                            <span>-->
-                            <!--                                <template x-if="link.facts.length > 0">-->
-                            <!--                                    <button title="show facts" class="button no-style"-->
-                            <!--                                            x-on:click="selectedLink = link; getResults(link.id); openModal = 'showFacts'">-->
-                            <!--                                        <i class="fas fa-star facts"></i>-->
-                            <!--                                    </button>-->
-                            <!--                                </template>-->
-                            <!--                                <template x-if="link.facts.length < 1">-->
-                            <!--                                    <button disabled class="button no-style" title="no facts"><i-->
-                            <!--                                            class="far fa-star no-facts"></i></button>-->
-                            <!--                                </template>-->
-                            <!--                            </span>-->
+                        <div id="link-actions"
+                             class="my-3 is-flex is-flex-direction-row is-justify-content-flex-end is-align-items-center">
+                            <label for="link-actions">Link actions:</label>
                             <span>
                                 <button title="add link"
-                                        x-bind:disabled="selectedLink.status === -5"
+                                        x-bind:disabled="selectedLink?.status === -5"
                                         class="button no-style"
-                                        x-on:click="updateLinkState(selectedLink.id, -3)">
+                                        x-on:click="updateLinkState(selectedLink?.id, -3)">
                                     <i class="fas fa-plus"></i>
                                 </button>
                                 <button title="remove link"
                                         class="button no-style"
-                                        x-bind:disabled="!(selectedLink.collect || selectedLink.status <= -4) || selectedLink.status === -1"
-                                        x-on:click="updateLinkState(selectedLink.id, -2)">
+                                        x-bind:disabled="!(selectedLink?.collect || selectedLink?.status <= -4) || selectedLink?.status === -1"
+                                        x-on:click="updateLinkState(selectedLink?.id, -2)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </span>
-                            <!--                                <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === selectedLink.id ? 'selected' : '') ">-->
+                            <!--                                <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === selectedLink?.id ? 'selected' : '') ">-->
                             <button title="edit command"
                                     class="button no-style"
-                                    x-bind:disabled="selectedLink.status === -1"
-                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === selectedLink.id) ? null : selectedLink.id">
-                                <i x-bind:class="(showLinkEditDropdown === selectedLink.id) ? 'expanded' : 'collapsed'"
+                                    x-bind:disabled="selectedLink?.status === -1"
+                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === selectedLink?.id) ? null : selectedLink?.id">
+                                <i x-bind:class="(showLinkEditDropdown === selectedLink?.id) ? 'expanded' : 'collapsed'"
                                    class="fas fa-pencil-alt editCommand"></i>
                             </button>
                             <!--                                </span>-->
@@ -1128,6 +1118,12 @@
 </script>
 
 <style>
+    :scope {
+        --primary-color: #8B0000;
+        --dark-gray: gray;
+        --light-gray: #e6e6e6;
+    }
+
     .search-box i {
         background-color: #e6e6e6;
         color: gray;
@@ -1153,9 +1149,18 @@
         width: 100%;
     }
 
+    span.decisionsIcon {
+        position: absolute !important;
+        font-size: x-small;
+        font-weight: 500;
+        font-family: sans-serif;
+        margin-left: -22px !important;
+        margin-top: 18px !important;
+    }
+
     .operation-menu-links {
         color: white;
-        margin: 1rem 2em;
+        margin-right: 2em;
         text-align: left;
         cursor: pointer;
         display: flex;
@@ -1170,7 +1175,7 @@
     }
 
     .operation-menu-links i {
-        font-size: 4em;
+        font-size: 3em;
         padding-bottom: 5px;
     }
 
@@ -1444,7 +1449,7 @@
     }
 
     button.chip-select {
-        border: 2px solid #8B0000;
+        border: 2px solid var(--primary-color);
         border-radius: 24px;
         color: white;
         padding: 5px 12px;
@@ -1453,12 +1458,12 @@
     }
 
     button.chip-select:hover {
-        background-color: #8B0000;
+        background-color: var(--primary-color);
         transform: none !important;
     }
 
     button.chip-select.selected {
-        background-color: #8B0000;
+        background-color: var(--primary-color);
     }
 
     button.no-style:hover {
@@ -1564,7 +1569,7 @@
     table tbody td span.linkStatus::before {
         width: 2px;
         height: 140px;
-        background-color: #8B0000;
+        background-color: var(--primary-color);
         content: "";
         display: inline-block;
         position: absolute;
