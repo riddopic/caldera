@@ -31,11 +31,11 @@
                         <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button"
                                 title="quick add operation" class="button is-primary is-small"
                                 x-on:click="handleStartOperation(true)"><i class="pr-1 fas fa-plus"></i>
-                            Quick add operation
+                            Quick add
                         </button>
                         <button type="button" title="add operation" class="ml-2 button is-primary is-small"
                                 x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
-                            Add new operation
+                            Create operation
                         </button>
                         <button type="button" title="delete operation" class="ml-2 button is-primary is-small"
                                 x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
@@ -61,7 +61,7 @@
                         <!--                        </div>-->
                     </div>
                 </div>
-                <div class="is-flex is-flex-direction-row is-justify-content-flex-start">
+                <div class="is-flex is-flex-direction-row is-justify-content-flex-start operation-menu-container">
                     <template x-for="op in filteredOperations">
                         <button class="no-style operation-menu-links"
                                 x-bind:title="op.name + ' has ' + op.chain.length + ' decisions'"
@@ -133,39 +133,44 @@
                                         </button>
                                         {% endfor %}
                                     </div>
+                                    <div class="navbar-divider my-5"></div>
                                 </div>
 
-                                <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
-                                    <div class="toggleContainer my-3">
-                                        <label for="toggleAutonomous">Autonomous</label>
+
+                                <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center width-100">
+                                    <div class="toggleContainer">
+                                        <label for="toggleAutonomous">Manual</label>
                                         <div class="toggleSwitch mx-2">
-                                            <input type="checkbox" id="toggleAutonomous"
+                                            <input type="checkbox"
+                                                   id="toggleAutonomous"
                                                    x-model="selectedOperation.autonomous"
                                                    x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
                                                    x-on:change="updateOperationToggle()"/>
                                             <span class="toggleSlider toggleSliderRound"
+                                                  x-on:click="selectedOperation.autonomous = !selectedOperation.autonomous; updateOperationToggle()"
                                                   x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
                                                 <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
                                             </span>
                                         </div>
-                                        <label for="toggleAutonomous">Manual</label>
+                                        <label for="toggleAutonomous">Autonomous</label>
                                     </div>
 
-                                    <div class="my-3">
+                                    <div>
                                         <button title="add manual command" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addCommand'">Add manual command
+                                                x-on:click="openModal = 'addCommand'"><i class="pr-1 fas fa-plus"></i>Command
                                         </button>
                                         <button title="add potential link" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addLink'">Add potential link
+                                                x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Link
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <div class="navbar-divider my-5 width-100"></div>
 
                         <div id="link-actions"
-                             class="my-3 is-flex is-flex-direction-row is-justify-content-flex-end is-align-items-center">
+                             class="is-flex is-flex-direction-row is-justify-content-flex-end is-align-items-center">
                             <label for="link-actions">Link actions:</label>
                             <span>
                                 <button title="add link"
@@ -193,7 +198,10 @@
                         </div>
 
                         <div class="log-container">
-                            <template x-if="selectedOperation.chain">
+                            <template x-if="selectedOperation.chain.length === 0">
+                                <em>No links––click the buttons on the right to add commands/links.</em>
+                            </template>
+                            <template x-if="selectedOperation.chain.length > 0">
                                 <table class="table">
                                     <thead>
                                     <tr class="table-header">
@@ -1152,12 +1160,17 @@
     }
 
     span.decisionsIcon {
-        position: absolute !important;
         font-size: x-small;
         font-weight: 500;
         font-family: sans-serif;
         margin-left: -22px !important;
-        margin-top: 18px !important;
+        position: relative;
+        top: -8px;
+    }
+
+    .operation-menu-container {
+        overflow-y: visible;
+        overflow-x: scroll;
     }
 
     .operation-menu-links {
@@ -1188,6 +1201,10 @@
     .modal-card {
         max-height: 90vh;
         overflow-y: scroll;
+    }
+
+    .width-100 {
+        width: 100%
     }
 
     .column {
@@ -1340,7 +1357,7 @@
     }
 
     .toggleSlider {
-        border: 3px solid white;
+        border: 2px solid white;
         position: absolute;
         cursor: pointer;
         top: 0;
@@ -1353,11 +1370,11 @@
     .toggleSlider::before {
         position: absolute;
         content: "";
-        height: 22px;
-        width: 22px;
+        height: 24px;
+        width: 24px;
         bottom: 4px;
         transition: all 0.3s ease;
-        left: 4px;
+        left: 3px;
         top: 3px;
     }
 
