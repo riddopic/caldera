@@ -216,7 +216,7 @@
                                         <tbody :key="index">
                                         <tr x-bind:id="link.id"
                                             x-bind:class="selectedLink === link ? 'selected' : ''"
-                                            x-on:click="selectedLink = link; console.log('new link', selectedLink, link); getResults(link.id);">
+                                            x-on:click="selectedLink = link; getResults(link.id);">
                                             <td class="decideColumn">
                                                 <span x-text="link.decide"></span>
                                                 <span x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
@@ -646,7 +646,7 @@
                             <!--                    TODO when user clicks on add operation it should show on view screen-->
                             <!--                    TODO add tooltip for scheduling, user must set AM/PM along with numerical time value in order for schedule to work-->
                             <template x-if="openModal === 'addOperation'">
-                                <button class="button is-primary is-small" x-on:click="handleStartOperation"
+                                <button class="button is-primary is-small" x-on:click="handleStartOperation(false)"
                                         x-text="schedule ? 'Schedule' : 'Start'"></button>
                             </template>
                             <template x-if="openModal === 'addCommand'">
@@ -852,7 +852,6 @@
                 if (this.selectedOperationID) {
                     restRequest('GET', {}, (res) => {
                         this.selectedOperation = JSON.parse(res);
-                        console.log('NEW OP stat', this.selectedOperation.state)
                         // toast('Go to the GameBoard plugin to see if the blue team can detect your activities.', true);
                     }, endpoint + '/' + this.selectedOperationID);
                 } else {
@@ -920,7 +919,7 @@
                         // TODO if the v2 PUT request returns a new operation id, set this to the ID
                         // if not, then set it to latest item in this.operations[]
                         // this.selectedOperation = this.startOperation;
-                        this.resetObject(this.startOperation);
+                        this.resetOperation();
                         this.getOperations();
                     });
                     toast('Started operation ' + this.startOperation.name + "!", true);
@@ -978,7 +977,6 @@
             },
 
             updateOperationToggle() {
-                console.log('SELECTED OP TOGGLE', this.selectedOperation.autonomous);
                 restRequest('POST', {
                     'index': 'operation',
                     'op_id': this.selectedOperationID,
@@ -987,7 +985,6 @@
             },
 
             updateObfuscator(newObfuscator) {
-                console.log('chosen obfusc', newObfuscator, this.selectedOperation.obfuscator)
                 this.selectedOperation.obfuscator = newObfuscator;
                 restRequest('POST', {
                     'index': 'operation',
@@ -1020,7 +1017,6 @@
                 if (!this.selectedOperationID) {
                     toast('Select a valid operation to download.');
                 } else {
-                    console.log('agent output val', this.isAgentOutputSelected, Number(this.isAgentOutputSelected));
                     restRequest('POST', {
                         'index': 'operation_report',
                         'op_id': this.selectedOperationID,
@@ -1044,6 +1040,25 @@
                 elem.setAttribute('href', dataURL);
                 elem.setAttribute('download', fileName + '.json');
                 elem.click();
+            },
+
+            resetOperation() {
+                this.startOperation = {
+                    index: "operations",
+                    name: "",
+                    group: "",
+                    adversary_id: "",
+                    auto_close: "0",
+                    state: "running",
+                    autonomous: "1",
+                    planner: "atomic",
+                    source: "basic",
+                    use_learning_parsers: "1",
+                    timeout: "30",
+                    obfuscator: "plain-text",
+                    jitter: "4/8",
+                    visibility: "50",
+                };
             },
 
             resetObject(obj = {}) {
@@ -1081,12 +1096,10 @@
 
             filterOperations(userInput) {
                 this.searchInput = userInput;
-                console.log('inputted', userInput);
-                this.filteredOperations = this.operations.filter((op) => op.name.includes(userInput));
+                this.filteredOperations = this.operations.filter((op) => op.name.includes(userInput)).sort((a,b) => { let c = new Date(a.start); let d = new Date(b.start); return d - c;}); // Filter and sort by start time (newest -> oldest)
             },
 
             filterAbilities() {
-                console.log('filterAbilities called', this.potentialLink);
                 this.filteredLinksList = this.potentialLink.agent.links.filter((link) => {
                     let match = true;
                     if (this.potentialLink.tactic) match = this.potentialLink.tactic === link.ability.tactic;
@@ -1140,8 +1153,8 @@
     }
 
     .operation-menu-container {
-        overflow-y: visible;
         overflow-x: scroll;
+        padding-bottom: 20px;
     }
 
     .operation-menu-links {
@@ -1163,6 +1176,7 @@
     .operation-menu-links i {
         font-size: 3em;
         padding-bottom: 5px;
+        min-width: 35px;
     }
 
     .operation-menu-links:hover {
