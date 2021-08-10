@@ -9,7 +9,7 @@
             </div>
             <hr>
         </div>
-        <!--        <div class="columns">-->
+
         <div>
             <div class="is-flex-direction-column">
                 <div class="columns">
@@ -56,10 +56,14 @@
             </div>
 
 
-            <div class="">
+            <div>
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
-                        <div class="navbar-divider my-5"></div>
+                        <div class="ellipsis-divider mt-2 mb-5">
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle"></i>
+                        </div>
                         <div class="columns">
                             <div class="column is-flex is-flex-direction-column is-justify-content-center">
                                 <div class="is-flex is-flex-direction-row is-justify-content-center mt-2 ml-5">
@@ -97,9 +101,9 @@
                             </div>
 
                             <div class="column is-flex is-flex-direction-column is-flex-wrap-wrap is-align-items-flex-end">
-                                <div>
-                                    <label for="operation-obfuscator"></label>
-                                    Obfuscation method:
+                                <div class="mb-4">
+                                    <label for="operation-obfuscator" class="is-size-6">
+                                        Obfuscation method:
                                     </label>
                                     <div class="is-flex is-flex-direction-row is-flex-wrap-wrap"
                                          id="operation-obfuscator">
@@ -111,7 +115,6 @@
                                         </button>
                                         {% endfor %}
                                     </div>
-                                    <div class="navbar-divider my-5"></div>
                                 </div>
 
 
@@ -164,7 +167,16 @@
                             </div>
                         </div>
 
-                        <div class="navbar-divider my-5 width-100"></div>
+                        <div class="width-100 is-flex is-justify-content-center">
+                            <button class="button no-style"
+                                    type="button"
+                                    x-on:click="isOperationsControlsExpanded = !isOperationsControlsExpanded">
+                                <i x-show="isOperationsControlsExpanded" class="fas fa-angle-up"></i>
+                                <i x-show="!isOperationsControlsExpanded" class="fas fa-angle-down"></i>
+                            </button>
+                        </div>
+
+                        <div class="navbar-divider mb-5 width-100"></div>
 
                         <div class="is-flex is-justify-content-flex-end">
                             <button title="add manual command" class="button is-primary is-small ml-2"
@@ -798,6 +810,7 @@
             schedule: "",
             showLinkEditDropdown: null,
             editedCommand: null,
+            isOperationsControlsExpanded: true,
 
             get selectedAgent() {
                 return this.selectedOperation?.host_group[this.selectedAgentIndex];
@@ -1090,6 +1103,16 @@
         --primary-color: #8B0000;
         --dark-gray: gray;
         --light-gray: #e6e6e6;
+    }
+
+    .ellipsis-divider {
+        text-align: center;
+        font-size: 0.3em;
+    }
+
+    .ellipsis-divider i {
+        color: #484747;
+        padding: 0 7em;
     }
 
     .search-box i {
