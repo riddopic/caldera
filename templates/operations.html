@@ -37,28 +37,6 @@
                                 x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
                             Create operation
                         </button>
-                        <button type="button" title="delete operation" class="ml-2 button is-primary is-small"
-                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i></button>
-                        <button title="download event logs" class="button is-primary is-small ml-2"
-                                x-on:click="openModal = 'showDownloadMenu'"><i class="pr-1 fas fa-arrow-down"></i>
-                        </button>
-                        <!--                        TODO add modal to download button-->
-                        <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
-                        <!--                            <div class="mr-2">-->
-                        <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
-                        <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
-                        <!--                            </div>-->
-                        <!--                            <div class="is-flex mt-2">-->
-                        <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
-                        <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
-                        <!--                                    report-->
-                        <!--                                </button>-->
-                        <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
-                        <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
-                        <!--                                    logs-->
-                        <!--                                </button>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
                     </div>
                 </div>
                 <div class="is-flex is-flex-direction-row is-justify-content-flex-start operation-menu-container">
@@ -156,12 +134,31 @@
                                     </div>
 
                                     <div>
-                                        <button title="add manual command" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addCommand'"><i class="pr-1 fas fa-plus"></i>Command
+                                        <button type="button" title="delete operation"
+                                                class="ml-2 button is-primary is-small"
+                                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
                                         </button>
-                                        <button title="add potential link" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Link
+                                        <button title="download event logs" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'showDownloadMenu'"><i
+                                                class="pr-1 fas fa-arrow-down"></i>
                                         </button>
+                                        <!--                        TODO add modal to download button-->
+                                        <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
+                                        <!--                            <div class="mr-2">-->
+                                        <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
+                                        <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
+                                        <!--                            </div>-->
+                                        <!--                            <div class="is-flex mt-2">-->
+                                        <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
+                                        <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
+                                        <!--                                    report-->
+                                        <!--                                </button>-->
+                                        <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
+                                        <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
+                                        <!--                                    logs-->
+                                        <!--                                </button>-->
+                                        <!--                            </div>-->
+                                        <!--                        </div>-->
                                     </div>
                                 </div>
                             </div>
@@ -169,23 +166,13 @@
 
                         <div class="navbar-divider my-5 width-100"></div>
 
-                        <div id="link-actions"
-                             class="is-flex is-flex-direction-row is-justify-content-flex-end is-align-items-center">
-                            <label for="link-actions">Link actions:</label>
-                            <span>
-                                <button title="add link"
-                                        x-bind:disabled="selectedLink?.status === -5"
-                                        class="button no-style"
-                                        x-on:click="updateLinkState(selectedLink?.id, -3)">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button title="remove link"
-                                        class="button no-style"
-                                        x-bind:disabled="!(selectedLink?.collect || selectedLink?.status <= -4) || selectedLink?.status === -1"
-                                        x-on:click="updateLinkState(selectedLink?.id, -2)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </span>
+                        <div class="is-flex is-justify-content-flex-end">
+                            <button title="add manual command" class="button is-primary is-small ml-2"
+                                    x-on:click="openModal = 'addCommand'"><i class="pr-1 fas fa-plus"></i>Manual Command
+                            </button>
+                            <button title="add potential link" class="button is-primary is-small ml-2"
+                                    x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Potential Link
+                            </button>
                         </div>
 
                         <div class="log-container">
