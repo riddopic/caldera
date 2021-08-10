@@ -643,8 +643,6 @@
                             </div>
                         </template>
                         <footer class="modal-card-foot">
-                            <!--                    TODO when user clicks on add operation it should show on view screen-->
-                            <!--                    TODO add tooltip for scheduling, user must set AM/PM along with numerical time value in order for schedule to work-->
                             <template x-if="openModal === 'addOperation'">
                                 <button class="button is-primary is-small" x-on:click="handleStartOperation(false)"
                                         x-text="schedule ? 'Schedule' : 'Start'"></button>
@@ -652,8 +650,7 @@
                             <template x-if="openModal === 'addCommand'">
                                 <button class="button is-primary is-small"
                                         x-on:click="handleManualCommand">
-                                    <!--                                TODO change save to add command? explore later-->
-                                    Save
+                                    Add
                                 </button>
                             </template>
                             <template x-if="openModal === 'addLink'">
@@ -914,13 +911,12 @@
                     this.openModal = null;
                     toast('Scheduled operation ' + this.startOperation.name + "!", true);
                 } else {
-                    restRequest('PUT', this.startOperation, () => {
+                    restRequest('PUT', this.startOperation, (res) => {
                         toast('Notice that you can pause or stop the operation at any time. Toggle into manual mode if you want full control or click potential links to add TTPs to the operation.', true);
-                        // TODO if the v2 PUT request returns a new operation id, set this to the ID
-                        // if not, then set it to latest item in this.operations[]
-                        // this.selectedOperation = this.startOperation;
                         this.resetOperation();
                         this.getOperations();
+                        this.selectedOperationID = JSON.parse(res)[0].id;
+                        this.getOperation();
                     });
                     toast('Started operation ' + this.startOperation.name + "!", true);
                     this.openModal = null;
