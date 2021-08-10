@@ -186,15 +186,6 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </span>
-                            <!--                                <span x-bind:class="'editButtonContainer ' + (showLinkEditDropdown === selectedLink?.id ? 'selected' : '') ">-->
-                            <button title="edit command"
-                                    class="button no-style"
-                                    x-bind:disabled="selectedLink?.status === -1"
-                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === selectedLink?.id) ? null : selectedLink?.id">
-                                <i x-bind:class="(showLinkEditDropdown === selectedLink?.id) ? 'expanded' : 'collapsed'"
-                                   class="fas fa-pencil-alt editCommand"></i>
-                            </button>
-                            <!--                                </span>-->
                         </div>
 
                         <div class="log-container">
@@ -246,31 +237,42 @@
                                                 <template x-if="!selectedLinkFacts">
                                                     <p>No facts available.</p>
                                                 </template>
-                                                <p x-show="selectedLinkCommand">Command: <em
-                                                        x-text="selectedLinkCommand"></em></p>
-                                            </td>
-
-                                        </tr>
-                                        <tr x-show="false" class="linkEditCommandRow"
-                                            x-show="showLinkEditDropdown === link.id">
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td x-init="editedCommand = editedCommand ? editedCommand : b64DecodeUnicode(link.command)">
-                                                <label for="editedCommand"></label>
-                                                <textarea id="editedCommand"
-                                                          class="code"
-                                                          contenteditable
-                                                          x-model="editedCommand"
-                                                          spellcheck="false"></textarea>
-                                                <div class="linkEditControls">
-                                                    <button class="button is-primary is-small"
-                                                            x-on:click="updateLinkState(link.id, -3, editedCommand); showLinkEditDropdown = null">
-                                                        Update
-                                                    </button>
+                                                <div class="outputEditCommand">
+                                                    <div>
+                                                        <label for="edit-command">Command:</label>
+                                                    </div>
+                                                    <template
+                                                            x-if="selectedLinkCommand && showLinkEditDropdown !== selectedLink.id">
+                                                        <div class="is-flex align-center">
+                                                            <textarea id="edit-command"
+                                                                      class="code"
+                                                                      readonly
+                                                                      x-text="selectedLinkCommand"
+                                                                      spellcheck="false"></textarea>
+                                                            <button type="button"
+                                                                    title="edit command"
+                                                                    class="button is-primary is-small"
+                                                                    x-bind:disabled="!selectedLink || selectedLink?.status === -1 || selectedLink.finish || selectedLink.output"
+                                                                    x-on:click="showLinkEditDropdown = (showLinkEditDropdown === selectedLink?.id) ? null : selectedLink?.id">
+                                                                <i class="fas fa-pencil-alt editCommand"></i>
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="showLinkEditDropdown === selectedLink.id">
+                                                        <div class="is-flex align-center">
+                                                            <textarea id="edit-command"
+                                                                      class="code"
+                                                                      contenteditable
+                                                                      x-model="editedCommand"
+                                                                      spellcheck="false"></textarea>
+                                                            <button type="button"
+                                                                    class="button is-primary is-small"
+                                                                    x-on:click="updateLinkState(selectedLink.id, -3, editedCommand); showLinkEditDropdown = null;">
+                                                                Update
+                                                            </button>
+                                                        </div>
+                                                    </template>
                                                 </div>
-                                            </td>
                                         </tr>
                                         </tbody>
                                     </template>
@@ -457,10 +459,13 @@
                                         <div>
                                             <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs):</label>
                                             <div class="modal-form-fields">
-                                                <input id="autonomous-cleanup_timeout" class="input" x-model="startOperation.timeout" type="number"
+                                                <input id="autonomous-cleanup_timeout" class="input"
+                                                       x-model="startOperation.timeout" type="number"
                                                        placeholder="30" value="30" min="0" max="300"
-                                                       onchange="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.')">
-                                                <button type="button" class="no-style reset" title="reset to default" x-on:click="startOperation.timeout = 30;">reset</button>
+                                                       x-on:change.once="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.', true)">
+                                                <button type="button" class="no-style reset" title="reset to default"
+                                                        x-on:click="startOperation.timeout = 30;">reset
+                                                </button>
                                             </div>
                                         </div>
 
@@ -469,7 +474,7 @@
                                                 sec:</label>
                                             <div class="modal-form-fields">
                                                 <input class="input"
-                                                       x-on:change="validateJitter(jitterMin+'/'+jitterMax)"
+                                                       x-on:change.debounce.500ms="validateJitter(jitterMin+'/'+jitterMax)"
                                                        x-model="jitterMin"
                                                        id="stealth-jitterMin"
                                                        type="number"
@@ -478,14 +483,16 @@
                                                        placeholder="4"/>
                                                 <span>/</span>
                                                 <input class="input"
-                                                       x-on:change="validateJitter(jitterMin+'/'+jitterMax)"
+                                                       x-on:change.debounce.500ms="validateJitter(jitterMin+'/'+jitterMax)"
                                                        x-model="jitterMax"
                                                        id="stealth-jitterMax"
                                                        type="number"
                                                        required
                                                        pattern="[0-9]*"
                                                        placeholder="8"/>
-                                                <button type="button" class="no-style reset" title="reset to default" x-on:click="jitterMin = 4; jitterMax = 8;">reset</button>
+                                                <button type="button" class="no-style reset" title="reset to default"
+                                                        x-on:click="jitterMin = 4; jitterMax = 8;">reset
+                                                </button>
                                             </div>
                                         </div>
                                         <div>
@@ -494,7 +501,7 @@
                                                 <input x-model="startOperation.visibility"
                                                        id="stealth-queue"
                                                        type="range" value="50" min="1" max="100"
-                                                       onchange="toast('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.')">
+                                                       x-on:change.once="toast('The higher the visibility number, the more risk you will take with your operation getting noticed by the defense.', true)">
                                                 <span x-text="startOperation.visibility"></span>
                                             </div>
                                         </div>
@@ -619,26 +626,6 @@
                                         <template x-if="!filteredLinksList"><p>Building potential links...</p>
                                         </template>
                                     </div>
-                                </section>
-                            </div>
-                        </template>
-
-                        <template x-if="openModal === 'showFacts'">
-                            <div>
-                                <header class="modal-card-head">
-                                    <p class="modal-card-title">Facts</p>
-                                </header>
-                                <section class="modal-card-body">
-                                    <template x-if="selectedLinkOutput">
-                                        <div class="mb-5">
-                                            <p>Output: </p>
-                                            <code x-text="selectedLinkOutput"></code>
-                                        </div>
-                                    </template>
-                                    <template x-for="fact in selectedLinkFacts">
-                                        <p class="highlight" x-text="fact"></p>
-                                    </template>
-                                    <p x-show="selectedLinkCommand">Command: <em x-text="selectedLinkCommand"></em></p>
                                 </section>
                             </div>
                         </template>
@@ -857,15 +844,14 @@
             },
 
             deleteOperation() {
-                const operationName = this.selectedOperation.name;
                 restRequest('DELETE', {'index': 'operations', 'id': this.selectedOperationID}, (res) => {
                     // TODO check this error
-                    if (!res) toast('Error deleting operation: ', operationName);
+                    if (!res) toast('Error deleting operation.');
                     else {
                         this.getOperations();
                         this.selectedOperation = null;
                         this.selectedOperationID = null;
-                        toast('Deleted operation: ', operationName, true);
+                        toast('Deleted operation.', true);
                     }
                 })
             },
@@ -888,6 +874,7 @@
                             this.selectedLinkFacts.sort((a, b) => b.length - a.length);
                         }
                         this.selectedLinkCommand = b64DecodeUnicode(data.link.command);
+                        this.editedCommand = b64DecodeUnicode(data.link.command);
                     } else {
                         this.selectedLinkOutput = null;
                         this.selectedLinkFacts = null;
@@ -964,7 +951,7 @@
             },
 
             updateOperationState(newState) {
-                toast('Changing operation state to: ' + newState);
+                toast('Changing operation state to: ' + newState, true);
                 restRequest('POST', {
                     'index': 'operation',
                     'op_id': this.selectedOperationID,
@@ -1004,7 +991,7 @@
                             return;
                         }
                         this.getOperation();
-                        toast('Updating link status to: ' + linkStatuses[status]);
+                        toast('Updating link status to: ' + linkStatuses[status], true);
                     }
                 );
             },
@@ -1031,7 +1018,7 @@
 
             createDownloadReport(data, fileName) {
                 const dataURL = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-                toast('Downloading report: ' + fileName);
+                toast('Downloading report: ' + fileName, true);
                 const elem = document.createElement('a')
                 elem.setAttribute('href', dataURL);
                 elem.setAttribute('download', fileName + '.json');
@@ -1092,7 +1079,11 @@
 
             filterOperations(userInput) {
                 this.searchInput = userInput;
-                this.filteredOperations = this.operations.filter((op) => op.name.includes(userInput)).sort((a,b) => { let c = new Date(a.start); let d = new Date(b.start); return d - c;}); // Filter and sort by start time (newest -> oldest)
+                this.filteredOperations = this.operations.filter((op) => op.name.includes(userInput)).sort((a, b) => {
+                    let c = new Date(a.start);
+                    let d = new Date(b.start);
+                    return d - c;
+                }); // Filter and sort by start time (newest -> oldest)
             },
 
             filterAbilities() {
@@ -1173,10 +1164,6 @@
         font-size: 3em;
         padding-bottom: 5px;
         min-width: 35px;
-    }
-
-    .operation-menu-links:hover {
-        /*transform: none !important;*/
     }
 
     .modal-card {
@@ -1364,7 +1351,7 @@
     }
 
     .toggle-off {
-        background-color: black;
+        background-color: initial;
     }
 
     .toggle-on {
@@ -1483,24 +1470,6 @@
         transform: scale(1.2);
     }
 
-    i.facts {
-        color: rgb(248, 193, 69);
-    }
-
-    i.no-facts {
-        color: gray;
-    }
-
-    i.editCommand.collapsed::after {
-        font-size: 5pt;
-        content: "▼";
-    }
-
-    i.editCommand.expanded::after {
-        font-size: 5pt;
-        content: "▲";
-    }
-
     i sub {
         font-family: sans-serif;
     }
@@ -1547,10 +1516,23 @@
         padding-bottom: 0;
     }
 
-    .editButtonContainer.selected {
-        background-color: #2b2929;
-        border-radius: 2px 2px 0;
-        padding: 5px 0;
+    table tbody td .outputEditCommand {
+        display: flex;
+        flex-flow: column;
+        margin: 0.5em 0;
+    }
+
+    table tbody td .outputEditCommand div {
+        margin: 0.5em 0 0 0 !important;
+    }
+
+    table tbody td .outputEditCommand textarea[readonly] {
+        color: #ff8181;
+        background-color: #262626;
+    }
+
+    table tbody td .outputEditCommand button {
+        margin: 5px;
     }
 
     table tbody tr.linkEditCommandRow td:last-child {
@@ -1579,8 +1561,9 @@
     /*gray timeline*/
     table tbody td span.linkStatus::before {
         width: 2px;
-        height: 140px;
-        background-color: var(--primary-color);
+        height: 170px;
+        background-color: white;
+        /*background-color: var(--primary-color);*/
         content: "";
         display: inline-block;
         position: absolute;
@@ -1597,7 +1580,7 @@
         left: -5px;
         top: 50px;
         display: block;
-        background: black;
+        background: #161616;
         border-radius: 50%;
         height: 2em;
         width: 2em;
