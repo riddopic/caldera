@@ -1,4 +1,4 @@
-<div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html">
+<div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html" @resize.window="console.log('meow'); getOperationsMenuCaretDisplay()">
     <div>
         <div>
             <div>
@@ -11,179 +11,207 @@
         </div>
 
         <div>
-            <div class="is-flex-direction-column">
-                <div class="columns">
-                    <div class="column is-flex is-one-fifth is-justify-content-space-between is-flex-direction-column">
-                        <div class="is-flex is-align-items-center search-box">
-                            <i class="fas fa-search"></i>
-                            <input id="op-search"
-                                   placeholder="Operation name"
-                                   x-ref="search"
-                                   x-on:keyup="filterOperations($el.value)">
-                            <i class="fas fa-times"
-                               x-on:click="filterOperations(''); searchInput = ''; $refs.search.value=''"></i>
+            <div x-bind:class="isOperationsControlsExpanded ? '' : 'columns'">
+
+                <div class="is-flex-direction-column"
+                     x-bind:class="isOperationsControlsExpanded ? '' : 'column is-half pb-0'">
+                    <div class="columns">
+                        <div x-bind:class="isOperationsControlsExpanded ? 'is-one-fifth' : ''"
+                             class="column is-flex is-justify-content-space-between is-flex-direction-column">
+                            <div class="is-flex is-align-items-center search-box">
+                                <i class="fas fa-search"></i>
+                                <input id="op-search"
+                                       placeholder="Operation name"
+                                       x-ref="search"
+                                       x-on:keyup="filterOperations($el.value)">
+                                <i class="fas fa-times"
+                                   x-on:click="filterOperations(''); searchInput = ''; $refs.search.value=''"></i>
+                            </div>
+                            <label class="is-size-7" for="op-search">
+                                <em x-text="searchInput ? ('searching: ' + searchInput) : 'search operations'"></em>
+                            </label>
                         </div>
-                        <label class="is-size-7" for="op-search">
-                            <em x-text="searchInput ? ('searching: ' + searchInput) : 'search operations'"></em>
-                        </label>
+                        <div class="column pl-0 is-flex is-align-content-flex-start">
+                            <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button"
+                                    title="quick add operation" class="button is-primary is-small"
+                                    x-on:click="handleStartOperation(true)"><i class="pr-1 fas fa-plus"></i>
+                                Quick add
+                            </button>
+                            <button type="button" title="add operation" class="ml-2 button is-primary is-small"
+                                    x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
+                                Create operation
+                            </button>
+                        </div>
                     </div>
-                    <div class="column pl-0 is-flex is-align-content-flex-start">
-                        <button x-bind:disabled="!(searchInput && filteredOperations.length === 0)" type="button"
-                                title="quick add operation" class="button is-primary is-small"
-                                x-on:click="handleStartOperation(true)"><i class="pr-1 fas fa-plus"></i>
-                            Quick add
-                        </button>
-                        <button type="button" title="add operation" class="ml-2 button is-primary is-small"
-                                x-on:click="openModal = 'addOperation'"><i class="pr-1 fas fa-plus"></i>
-                            Create operation
-                        </button>
+                    <div class="is-flex is-flex-direction-row is-align-items-center">
+                        <div class="is-flex is-flex-direction-row is-justify-content-flex-start operation-menu-container">
+                            <template x-for="op in filteredOperations">
+                                <button class="no-style operation-menu-links"
+                                        x-bind:title="op.name + ' has ' + op.chain.length + ' decisions'"
+                                        :key="op.id"
+                                        x-on:click="selectedOperationID = op.id; getOperation()">
+                                    <i x-show="selectedOperationID !== op.id" class="far fa-folder">
+                                        <span class="decisionsIcon" x-text="op.chain.length"></span></i>
+                                    <i x-show="selectedOperationID === op.id" class="far fa-folder-open"></i>
+                                    <span x-text="op.name"></span>
+                                    <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <template x-if="showOperationsMenuCaret">
+                            <div class="ml-2">
+                                <i class="fas fa-angle-right"></i>
+                            </div>
+                        </template>
                     </div>
                 </div>
-                <div class="is-flex is-flex-direction-row is-justify-content-flex-start operation-menu-container">
-                    <template x-for="op in filteredOperations">
-                        <button class="no-style operation-menu-links"
-                                x-bind:title="op.name + ' has ' + op.chain.length + ' decisions'"
-                                :key="op.id"
-                                x-on:click="selectedOperationID = op.id; getOperation()">
-                            <i x-show="selectedOperationID !== op.id" class="far fa-folder">
-                                <span class="decisionsIcon" x-text="op.chain.length"></span></i>
-                            <i x-show="selectedOperationID === op.id" class="far fa-folder-open"></i>
-                            <span x-text="op.name"></span>
-                            <span class="readable-time" x-text="getHumanFriendlyTime(op.start)"></span>
-                        </button>
+
+
+                <div x-bind:class="isOperationsControlsExpanded ? '' : 'column is-half pb-0'">
+                    <template x-if="selectedOperation">
+                        <div x-show="selectedOperationID">
+                            <template x-if="isOperationsControlsExpanded">
+                                <div class="ellipsis-divider mt-2 mb-5">
+                                    <i class="fas fa-circle"></i>
+                                    <i class="fas fa-circle"></i>
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                            </template>
+                            <div class="columns">
+                                <div class="column is-flex is-flex-direction-column is-justify-content-center">
+                                    <div class="is-flex is-flex-direction-row is-justify-content-center mt-2 ml-5">
+                                        <div class="mr-6">
+                                            <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
+                                            <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
+                                        </div>
+                                        <div class="mr-6">
+                                            <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
+                                            <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
+                                        </div>
+                                        <div class="mr-6">
+                                            <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
+                                            <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
+                                        </div>
+                                    </div>
+                                    <div class="controls-container is-flex is-justify-content-center is-align-items-center">
+                                        <button class="button no-style is-large"
+                                                x-on:click="updateOperationState('cleanup')"><i
+                                                alt="stop" class="fas fa-stop"></i></button>
+                                        <template x-if="selectedOperation.state ==='running'">
+                                            <button class="button no-style is-larger"
+                                                    x-on:click="updateOperationState('paused')"><i
+                                                    alt="pause" class="fas fa-pause-circle"></i></button>
+                                        </template>
+                                        <template x-if="selectedOperation.state !== 'running'">
+                                            <button class="button no-style is-larger"
+                                                    x-on:click="updateOperationState('running')">
+                                                <i alt="run" class="fas fa-play-circle"></i></button>
+                                        </template>
+                                        <button class="button no-style is-medium"
+                                                x-on:click="updateOperationState('run_one_link')">
+                                            <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
+                                    </div>
+                                </div>
+
+                                <template x-if="isOperationsControlsExpanded">
+                                    <div class="column is-flex is-flex-direction-column is-flex-wrap-wrap is-align-items-flex-end">
+                                        <div class="mb-4">
+                                            <label for="operation-obfuscator" class="is-size-6">
+                                                Obfuscation method:
+                                            </label>
+                                            <div class="is-flex is-flex-direction-row is-flex-wrap-wrap"
+                                                 id="operation-obfuscator">
+                                                {% for o in obfuscators %}
+                                                <button x-bind:class="selectedOperation.obfuscator === `{{ o.name|e }}` ? 'selected' : ''"
+                                                        class="no-style chip-select"
+                                                        x-on:click="updateObfuscator(`{{ o.name|e }}`)">
+                                                    {{ o.name|e }}
+                                                </button>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center width-100">
+                                            <div class="toggleContainer">
+                                                <label for="toggleAutonomous">Manual</label>
+                                                <div class="toggleSwitch mx-2">
+                                                    <input type="checkbox"
+                                                           id="toggleAutonomous"
+                                                           x-model="selectedOperation.autonomous"
+                                                           x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
+                                                           x-on:change="updateOperationToggle()"/>
+                                                    <span class="toggleSlider toggleSliderRound"
+                                                          x-on:click="selectedOperation.autonomous = !selectedOperation.autonomous; updateOperationToggle()"
+                                                          x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
+                                                <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
+                                            </span>
+                                                </div>
+                                                <label for="toggleAutonomous">Autonomous</label>
+                                            </div>
+
+                                            <div>
+                                                <button type="button" title="delete operation"
+                                                        class="ml-2 button is-primary is-small"
+                                                        x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
+                                                </button>
+                                                <button title="download event logs"
+                                                        class="button is-primary is-small ml-2"
+                                                        x-on:click="openModal = 'showDownloadMenu'"><i
+                                                        class="pr-1 fas fa-arrow-down"></i>
+                                                </button>
+                                                <!--                        TODO add modal to download button-->
+                                                <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
+                                                <!--                            <div class="mr-2">-->
+                                                <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
+                                                <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
+                                                <!--                            </div>-->
+                                                <!--                            <div class="is-flex mt-2">-->
+                                                <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
+                                                <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
+                                                <!--                                    report-->
+                                                <!--                                </button>-->
+                                                <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
+                                                <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
+                                                <!--                                    logs-->
+                                                <!--                                </button>-->
+                                                <!--                            </div>-->
+                                                <!--                        </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                        </div>
                     </template>
                 </div>
             </div>
 
+            <template x-if="selectedOperation">
+                <div class="width-100 is-flex is-justify-content-center">
+                    <button class="button no-style"
+                            type="button"
+                            x-on:click="isOperationsControlsExpanded = !isOperationsControlsExpanded">
+                        <i x-show="isOperationsControlsExpanded" class="fas fa-angle-up"></i>
+                        <i x-show="!isOperationsControlsExpanded" class="fas fa-angle-down"></i>
+                    </button>
+                </div>
+            </template>
 
+            <!--            TIMELINE-->
             <div>
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
-                        <div class="ellipsis-divider mt-2 mb-5">
-                            <i class="fas fa-circle"></i>
-                            <i class="fas fa-circle"></i>
-                            <i class="fas fa-circle"></i>
-                        </div>
-                        <div class="columns">
-                            <div class="column is-flex is-flex-direction-column is-justify-content-center">
-                                <div class="is-flex is-flex-direction-row is-justify-content-center mt-2 ml-5">
-                                    <div class="mr-6">
-                                        <h3 class="my-1 is-size-4" x-text="selectedOperation.name"></h3>
-                                        <h2 class="is-size-6 has-text-weight-normal mb-5 mt-0">Operation</h2>
-                                    </div>
-                                    <div class="mr-6">
-                                        <h3 class="my-1 is-size-5" x-text="selectedOperation.state"></h3>
-                                        <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Current state</h2>
-                                    </div>
-                                    <div class="mr-6">
-                                        <h3 class="my-1 is-size-5" x-text="selectedOperation.chain.length"></h3>
-                                        <h2 class="is-size-7 has-text-weight-normal mb-5 mt-0">Decisions</h2>
-                                    </div>
-                                </div>
-                                <div class="controls-container is-flex is-justify-content-center is-align-items-center">
-                                    <button class="button no-style is-large"
-                                            x-on:click="updateOperationState('cleanup')"><i
-                                            alt="stop" class="fas fa-stop"></i></button>
-                                    <template x-if="selectedOperation.state ==='running'">
-                                        <button class="button no-style is-larger"
-                                                x-on:click="updateOperationState('paused')"><i
-                                                alt="pause" class="fas fa-pause-circle"></i></button>
-                                    </template>
-                                    <template x-if="selectedOperation.state !== 'running'">
-                                        <button class="button no-style is-larger"
-                                                x-on:click="updateOperationState('running')">
-                                            <i alt="run" class="fas fa-play-circle"></i></button>
-                                    </template>
-                                    <button class="button no-style is-medium"
-                                            x-on:click="updateOperationState('run_one_link')">
-                                        <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
-                                </div>
-                            </div>
-
-                            <div class="column is-flex is-flex-direction-column is-flex-wrap-wrap is-align-items-flex-end">
-                                <div class="mb-4">
-                                    <label for="operation-obfuscator" class="is-size-6">
-                                        Obfuscation method:
-                                    </label>
-                                    <div class="is-flex is-flex-direction-row is-flex-wrap-wrap"
-                                         id="operation-obfuscator">
-                                        {% for o in obfuscators %}
-                                        <button x-bind:class="selectedOperation.obfuscator === `{{ o.name|e }}` ? 'selected' : ''"
-                                                class="no-style chip-select"
-                                                x-on:click="updateObfuscator(`{{ o.name|e }}`)">
-                                            {{ o.name|e }}
-                                        </button>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-
-
-                                <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center width-100">
-                                    <div class="toggleContainer">
-                                        <label for="toggleAutonomous">Manual</label>
-                                        <div class="toggleSwitch mx-2">
-                                            <input type="checkbox"
-                                                   id="toggleAutonomous"
-                                                   x-model="selectedOperation.autonomous"
-                                                   x-bind:checked="Boolean(selectedOperation.autonomous) ? 'checked' : null"
-                                                   x-on:change="updateOperationToggle()"/>
-                                            <span class="toggleSlider toggleSliderRound"
-                                                  x-on:click="selectedOperation.autonomous = !selectedOperation.autonomous; updateOperationToggle()"
-                                                  x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-on' : 'toggle-off'">
-                                                <span x-bind:class="Boolean(selectedOperation.autonomous) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
-                                            </span>
-                                        </div>
-                                        <label for="toggleAutonomous">Autonomous</label>
-                                    </div>
-
-                                    <div>
-                                        <button type="button" title="delete operation"
-                                                class="ml-2 button is-primary is-small"
-                                                x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
-                                        </button>
-                                        <button title="download event logs" class="button is-primary is-small ml-2"
-                                                x-on:click="openModal = 'showDownloadMenu'"><i
-                                                class="pr-1 fas fa-arrow-down"></i>
-                                        </button>
-                                        <!--                        TODO add modal to download button-->
-                                        <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
-                                        <!--                            <div class="mr-2">-->
-                                        <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
-                                        <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
-                                        <!--                            </div>-->
-                                        <!--                            <div class="is-flex mt-2">-->
-                                        <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
-                                        <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
-                                        <!--                                    report-->
-                                        <!--                                </button>-->
-                                        <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
-                                        <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
-                                        <!--                                    logs-->
-                                        <!--                                </button>-->
-                                        <!--                            </div>-->
-                                        <!--                        </div>-->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="width-100 is-flex is-justify-content-center">
-                            <button class="button no-style"
-                                    type="button"
-                                    x-on:click="isOperationsControlsExpanded = !isOperationsControlsExpanded">
-                                <i x-show="isOperationsControlsExpanded" class="fas fa-angle-up"></i>
-                                <i x-show="!isOperationsControlsExpanded" class="fas fa-angle-down"></i>
-                            </button>
-                        </div>
-
                         <div class="navbar-divider mb-5 width-100"></div>
 
                         <div class="is-flex is-justify-content-flex-end">
                             <button title="add manual command" class="button is-primary is-small ml-2"
-                                    x-on:click="openModal = 'addCommand'"><i class="pr-1 fas fa-plus"></i>Manual Command
+                                    x-on:click="openModal = 'addCommand'"><i class="pr-1 fas fa-plus"></i>Manual
+                                Command
                             </button>
                             <button title="add potential link" class="button is-primary is-small ml-2"
-                                    x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Potential Link
+                                    x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Potential
+                                Link
                             </button>
                         </div>
 
@@ -811,6 +839,12 @@
             showLinkEditDropdown: null,
             editedCommand: null,
             isOperationsControlsExpanded: true,
+            showOperationsMenuCaret: true,
+
+            getOperationsMenuCaretDisplay() {
+                const el = document.querySelector('.operation-menu-container');
+                this.showOperationsMenuCaret = el.scrollWidth > el.offsetWidth;
+            },
 
             get selectedAgent() {
                 return this.selectedOperation?.host_group[this.selectedAgentIndex];
@@ -1084,6 +1118,7 @@
                     let d = new Date(b.start);
                     return d - c;
                 }); // Filter and sort by start time (newest -> oldest)
+                this.getOperationsMenuCaretDisplay();
             },
 
             filterAbilities() {
