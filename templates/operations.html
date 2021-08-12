@@ -1,5 +1,5 @@
 <div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html"
-     @resize.window="console.log('meow'); getOperationsMenuCaretDisplay()">
+     @resize.window="getOperationsMenuCaretDisplay()">
     <div>
         <div>
             <div>
@@ -668,6 +668,7 @@
                                     Add
                                 </button>
                             </template>
+                            <!--                            TODO bug with pressing Enter in create new operation form (it should start operation instead)-->
                             <template x-if="openModal === 'addOperation'">
                                 <button class="button p-0 is-primary" x-on:click="handleStartOperation(false)"
                                         x-text="schedule ? 'Schedule' : 'Start'"></button>
