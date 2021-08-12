@@ -1,4 +1,5 @@
-<div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html" @resize.window="console.log('meow'); getOperationsMenuCaretDisplay()">
+<div x-data="alpineOperations()" x-init="getOperations()" xmlns="http://www.w3.org/1999/html"
+     @resize.window="console.log('meow'); getOperationsMenuCaretDisplay()">
     <div>
         <div>
             <div>
@@ -348,7 +349,7 @@
                                         </div>
 
                                         <div>
-                                            <label for="autonomous-source">Source:</label>
+                                            <label for="autonomous-source">Fact source:</label>
                                             <div class="modal-form-fields" id="autonomous-source">
                                                 <select x-model="startOperation.source">
                                                     {% for s in sources %}
@@ -369,25 +370,7 @@
                                     </div>
                                     <div class="modal-form" x-show="openModalForm.advanced">
                                         <div>
-                                            <label for="autonomous-planner">Planner:</label>
-                                            <div class="modal-form-fields">
-                                                <select id="autonomous-planner" x-model="startOperation.planner">
-                                                    {% for p in planners %}
-                                                    {% if p.allow_repeatable_abilities %}
-                                                    <option data-allow-repeatable-abilities>
-                                                        {{ p.name|e }}
-                                                    </option>
-                                                    {% else %}
-                                                    <option x-bind:disabled="isSelectedAdversaryRepeatable ? 'true' : null">
-                                                        {{ p.name|e }}
-                                                    </option>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="basic-groups">Groups:</label>
+                                            <label for="basic-groups">Group:</label>
                                             <div class="modal-form-fields"
                                                  id="basic-groups">
                                                 <button type="button"
@@ -407,9 +390,26 @@
                                                 </template>
                                             </div>
                                         </div>
-
                                         <div>
-                                            <label for="stealth-obfuscator">Obfuscator:</label>
+                                            <label for="autonomous-planner">Planner:</label>
+                                            <div class="modal-form-fields">
+                                                <select id="autonomous-planner" x-model="startOperation.planner">
+                                                    {% for p in planners %}
+                                                    {% if p.allow_repeatable_abilities %}
+                                                    <option data-allow-repeatable-abilities>
+                                                        {{ p.name|e }}
+                                                    </option>
+                                                    {% else %}
+                                                    <option x-bind:disabled="isSelectedAdversaryRepeatable ? 'true' : null">
+                                                        {{ p.name|e }}
+                                                    </option>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="stealth-obfuscator">Obfuscators:</label>
                                             <div class="modal-form-fields" id="stealth-obfuscator">
                                                 {% for o in obfuscators %}
                                                 <button class="no-style chip-select"
@@ -459,7 +459,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label for="basic-run">Run:</label>
+                                            <label for="basic-run">Run State:</label>
 
                                             <div class="modal-form-fields" id="basic-run">
                                                 <input type="radio" x-model="startOperation.state"
@@ -475,13 +475,14 @@
 
 
                                         <div>
-                                            <label for="autonomous-cleanup_timeout">Cleanup Timeout (secs):</label>
+                                            <label for="autonomous-cleanup_timeout">Cleanup Timeout (sec):</label>
                                             <div class="modal-form-fields">
                                                 <input id="autonomous-cleanup_timeout" class="input"
                                                        x-model="startOperation.timeout" type="number"
                                                        placeholder="30" value="30" min="0" max="300"
                                                        x-on:change.once="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.', true)">
-                                                <button type="button" class="button is-primary no-style reset" title="reset to default"
+                                                <button type="button" class="button is-primary no-style reset"
+                                                        title="reset to default"
                                                         x-on:click="startOperation.timeout = 30;">
                                                     Reset
                                                 </button>
@@ -499,7 +500,7 @@
                                                        required
                                                        pattern="[0-9]*"
                                                        placeholder="4"/>
-                                            <label for="stealth-jitterMin" for="stealth-jitterMax">min</label>
+                                                <label for="stealth-jitterMin" for="stealth-jitterMax">min</label>
                                                 <span>/</span>
                                                 <input class="input"
                                                        x-on:change.debounce.500ms="validateJitter(jitterMin+'/'+jitterMax)"
@@ -509,15 +510,16 @@
                                                        required
                                                        pattern="[0-9]*"
                                                        placeholder="8"/>
-                                            <label for="stealth-jitterMax">max</label>
-                                                <button type="button" class="button is-primary no-style reset" title="reset to default"
+                                                <label for="stealth-jitterMax">max</label>
+                                                <button type="button" class="button is-primary no-style reset"
+                                                        title="reset to default"
                                                         x-on:click="jitterMin = 4; jitterMax = 8;">
                                                     Reset
                                                 </button>
                                             </div>
                                         </div>
                                         <div>
-                                            <label for="stealth-queue">Adjust visibility:</label>
+                                            <label for="stealth-queue">Visibility:</label>
                                             <div class="modal-form-fields">
                                                 <input x-model="startOperation.visibility"
                                                        id="stealth-queue"
@@ -650,26 +652,25 @@
                                 </section>
                             </div>
                         </template>
-                        <footer class="modal-card-foot">
-                            <template x-if="openModal === 'addOperation'">
-                                <button class="button is-primary is-small" x-on:click="handleStartOperation(false)"
-                                        x-text="schedule ? 'Schedule' : 'Start'"></button>
+                        <footer class="modal-card-foot is-flex is-justify-content-space-between is-align-items-center width-100">
+                            <template x-if="openModal === 'addLink'">
+                                <button class="button p-0 ml-2 is-primary width-100" x-on:click="openModal = null">
+                                    Close
+                                </button>
+                            </template>
+                            <template x-if="openModal !== 'addLink'">
+                                <button class="button p-0 ml-2" x-on:click="openModal = null">Cancel
+                                </button>
                             </template>
                             <template x-if="openModal === 'addCommand'">
-                                <button class="button is-primary is-small"
+                                <button class="button p-0 is-primary"
                                         x-on:click="handleManualCommand">
                                     Add
                                 </button>
                             </template>
-                            <template x-if="openModal === 'addLink'">
-                                <div class="modal-results-close">
-                                    <button class="button is-small is-primary" x-on:click="openModal = null">Close
-                                    </button>
-                                </div>
-                            </template>
-                            <template x-if="openModal !== 'addLink'">
-                                <button class="button is-small" x-on:click="openModal = null">Cancel
-                                </button>
+                            <template x-if="openModal === 'addOperation'">
+                                <button class="button p-0 is-primary" x-on:click="handleStartOperation(false)"
+                                        x-text="schedule ? 'Schedule' : 'Start'"></button>
                             </template>
                         </footer>
                     </div>
@@ -1210,7 +1211,7 @@
     }
 
     .width-100 {
-        width: 100%
+        width: 100% !important;
     }
 
     .column {
@@ -1331,10 +1332,8 @@
         content: "";
     }
 
-    .modal-results-close {
-        display: flex;
-        justify-content: center;
-        width: 100%;
+    .modal-card-foot button {
+        font-size: 0.9em;
     }
 
     /*END MODAL FORM STYLE*/
@@ -1484,6 +1483,7 @@
         position: relative;
         margin-top: -40px;
         margin-left: -40px;
+        color: #a0a0a0;
     }
 
     .modal-form-fields button.chip-select {
