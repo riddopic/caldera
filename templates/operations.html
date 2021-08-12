@@ -700,9 +700,17 @@
 
     // https://stackoverflow.com/questions/7641791/javascript-library-for-human-friendly-relative-date-formatting
     function getHumanFriendlyTime(date) {
+        // i.e. format 2021-08-03 19:37:08
         if (!date) return '';
+        let split = date.split('-');
+
+        let hMonth = Number(split[1]) - 1;
+        let hDate = Number(split[2].split(' ')[0]);
+        let hTime = split[2].split(' ')[1].split(':');
+
+        const givenDate = new Date(split[0], hMonth, hDate, hTime[0], hTime[1], hTime[2]);
         // Make a fuzzy time
-        let delta = Math.round((+new Date - date) / 1000);
+        let delta = Math.round((new Date - givenDate) / 1000);
 
         let minute = 60,
             hour = minute * 60,
@@ -717,20 +725,14 @@
         } else if (delta < 2 * minute) {
             fuzzy = 'a minute ago'
         } else if (delta < hour) {
-            fuzzy = Math.floor(delta / minute) + ' minutes ago.';
+            fuzzy = Math.floor(delta / minute) + ' min ago';
         } else if (Math.floor(delta / hour) === 1) {
-            fuzzy = '1 hour ago'
+            fuzzy = '1 hr ago'
         } else if (delta < day) {
-            fuzzy = Math.floor(delta / hour) + ' hours ago.';
+            fuzzy = Math.floor(delta / hour) + ' hrs ago';
         } else if (delta < day * 2) {
             fuzzy = 'yesterday';
-        } else if (delta < day * 3) {
-            fuzzy = '3 days ago'
         } else {
-            let split = date.split('-')[0];
-            let hDate = split[2];
-            let hMonth = Number(split[1]);
-
             switch (hMonth) {
                 case 0:
                     hMonth = 'Jan';
@@ -772,7 +774,6 @@
                     hMonth = '';
                     break;
             }
-
             fuzzy = hMonth + ' ' + hDate;
         }
         return fuzzy;
@@ -1197,6 +1198,7 @@
     }
 
     .operation-menu-links .readable-time {
+        width: max-content;
         color: gray;
     }
 
