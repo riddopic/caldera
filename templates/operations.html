@@ -332,16 +332,6 @@
                                                        x-model="startOperation.name" required>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="modal-form-group-header">
-                                        <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm.basic = !openModalForm.basic"
-                                                x-bind:class="openModalForm.basic ? 'expanded' : 'collapsed'">
-                                            <span>Basic options</span>
-                                            <span class="navbar-divider"></span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-form" x-show="openModalForm.basic">
                                         <div>
                                             <label for="basic-adversary">Adversary:</label>
                                             <div class="modal-form-fields" id="basic-adversary">
@@ -358,6 +348,27 @@
                                         </div>
 
                                         <div>
+                                            <label for="autonomous-source">Source:</label>
+                                            <div class="modal-form-fields" id="autonomous-source">
+                                                <select x-model="startOperation.source">
+                                                    {% for s in sources %}
+                                                    <option>{{ s.name|e }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-form-group-header">
+                                        <button type="button" class="button no-style heading pt-2"
+                                                x-on:click="openModalForm.advanced = !openModalForm.advanced"
+                                                x-bind:class="openModalForm.advanced ? 'expanded' : 'collapsed'">
+                                            <span>Advanced</span>
+                                            <span class="navbar-divider"></span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-form" x-show="openModalForm.advanced">
+                                        <div>
                                             <label for="autonomous-planner">Planner:</label>
                                             <div class="modal-form-fields">
                                                 <select id="autonomous-planner" x-model="startOperation.planner">
@@ -371,16 +382,6 @@
                                                         {{ p.name|e }}
                                                     </option>
                                                     {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="autonomous-source">Source:</label>
-                                            <div class="modal-form-fields" id="autonomous-source">
-                                                <select x-model="startOperation.source">
-                                                    {% for s in sources %}
-                                                    <option>{{ s.name|e }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -406,17 +407,7 @@
                                                 </template>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="modal-form-group-header">
-                                        <button type="button" class="button no-style heading pt-2"
-                                                x-on:click="openModalForm.advanced = !openModalForm.advanced"
-                                                x-bind:class="openModalForm.advanced ? 'expanded' : 'collapsed'">
-                                            <span>Advanced</span>
-                                            <span class="navbar-divider"></span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-form" x-show="openModalForm.advanced">
                                         <div>
                                             <label for="stealth-obfuscator">Obfuscator:</label>
                                             <div class="modal-form-fields" id="stealth-obfuscator">
@@ -490,16 +481,16 @@
                                                        x-model="startOperation.timeout" type="number"
                                                        placeholder="30" value="30" min="0" max="300"
                                                        x-on:change.once="toast('The number of seconds Caldera will wait per cleanup action to complete before continuing.', true)">
-                                                <button type="button" class="no-style reset" title="reset to default"
-                                                        x-on:click="startOperation.timeout = 30;">reset
+                                                <button type="button" class="button is-primary no-style reset" title="reset to default"
+                                                        x-on:click="startOperation.timeout = 30;">
+                                                    Reset
                                                 </button>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label for="stealth-jitterMin" for="stealth-jitterMax">Jitter (min/max)
-                                                sec:</label>
-                                            <div class="modal-form-fields">
+                                            <label for="stealth-jitter">Jitter (sec/sec):</label>
+                                            <div class="modal-form-fields" id="stealth-jitter">
                                                 <input class="input"
                                                        x-on:change.debounce.500ms="validateJitter(jitterMin+'/'+jitterMax)"
                                                        x-model="jitterMin"
@@ -508,6 +499,7 @@
                                                        required
                                                        pattern="[0-9]*"
                                                        placeholder="4"/>
+                                            <label for="stealth-jitterMin" for="stealth-jitterMax">min</label>
                                                 <span>/</span>
                                                 <input class="input"
                                                        x-on:change.debounce.500ms="validateJitter(jitterMin+'/'+jitterMax)"
@@ -517,8 +509,10 @@
                                                        required
                                                        pattern="[0-9]*"
                                                        placeholder="8"/>
-                                                <button type="button" class="no-style reset" title="reset to default"
-                                                        x-on:click="jitterMin = 4; jitterMax = 8;">reset
+                                            <label for="stealth-jitterMax">max</label>
+                                                <button type="button" class="button is-primary no-style reset" title="reset to default"
+                                                        x-on:click="jitterMin = 4; jitterMax = 8;">
+                                                    Reset
                                                 </button>
                                             </div>
                                         </div>
@@ -796,7 +790,6 @@
             isAgentOutputSelected: false,
             openModal: null,
             openModalForm: {
-                'basic': false,
                 'advanced': false
             },
             operations: [],
@@ -1478,12 +1471,19 @@
     }
 
     button.no-style.reset {
-        padding: 0;
+        padding: 0.5em;
         width: fit-content;
+        font-size: .75em;
     }
 
     button.no-style[disabled] {
         background-color: initial !important;
+    }
+
+    label[for="stealth-jitterMin"], label[for="stealth-jitterMax"] {
+        position: relative;
+        margin-top: -40px;
+        margin-left: -40px;
     }
 
     .modal-form-fields button.chip-select {
