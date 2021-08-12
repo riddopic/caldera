@@ -269,7 +269,7 @@
                                                         <label for="edit-command">Command:</label>
                                                     </div>
                                                     <template
-                                                            x-if="selectedLinkCommand && showLinkEditDropdown !== selectedLink.id">
+                                                            x-if="selectedLinkCommand && showLinkEditDropdown !== selectedLink?.id">
                                                         <div class="is-flex align-center">
                                                             <textarea id="edit-command"
                                                                       class="code"
@@ -285,7 +285,7 @@
                                                             </button>
                                                         </div>
                                                     </template>
-                                                    <template x-if="showLinkEditDropdown === selectedLink.id">
+                                                    <template x-if="showLinkEditDropdown === selectedLink?.id">
                                                         <div class="is-flex align-center">
                                                             <textarea id="edit-command"
                                                                       class="code"
@@ -294,7 +294,7 @@
                                                                       spellcheck="false"></textarea>
                                                             <button type="button"
                                                                     class="button is-primary is-small"
-                                                                    x-on:click="updateLinkState(selectedLink.id, -3, editedCommand); showLinkEditDropdown = null;">
+                                                                    x-on:click="updateLinkState(selectedLink?.id, -3, editedCommand); showLinkEditDropdown = null;">
                                                                 Update
                                                             </button>
                                                         </div>
