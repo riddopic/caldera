@@ -112,15 +112,47 @@
                                                 x-on:click="updateOperationState('run_one_link')">
                                             <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
                                     </div>
+
+<!--                                    TODO DELETE/DOWNLOAD OP-->
+                                    <template x-if="isOperationsControlsExpanded">
+                                        <div class="is-flex is-justify-content-center pt-2">
+                                            <button title="download event logs"
+                                                    class="mx-2 button no-style"
+                                                    x-on:click="openModal = 'showDownloadMenu'"><i
+                                                    class="pr-1 fas fa-arrow-down"></i>
+                                            </button>
+                                            <!--                        TODO add modal to download button-->
+                                            <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
+                                            <!--                            <div class="mr-2">-->
+                                            <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
+                                            <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
+                                            <!--                            </div>-->
+                                            <!--                            <div class="is-flex mt-2">-->
+                                            <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
+                                            <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
+                                            <!--                                    report-->
+                                            <!--                                </button>-->
+                                            <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
+                                            <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
+                                            <!--                                    logs-->
+                                            <!--                                </button>-->
+                                            <!--                            </div>-->
+                                            <!--                        </div>-->
+                                            <button type="button" title="delete operation"
+                                                    class="mx-2 button no-style"
+                                                    x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <template x-if="isOperationsControlsExpanded">
                                     <div class="column is-flex is-flex-direction-column is-flex-wrap-wrap is-align-items-flex-end">
                                         <div class="mb-4">
-                                            <label for="operation-obfuscator" class="is-size-6">
+                                            <label x-show="false" for="operation-obfuscator" class="is-size-6">
                                                 Obfuscation method:
                                             </label>
-                                            <div class="is-flex is-flex-direction-row is-flex-wrap-wrap"
+                                            <div class="is-flex is-flex-direction-row is-flex-wrap-wrap is-justify-content-center pb-2"
                                                  id="operation-obfuscator">
                                                 {% for o in obfuscators %}
                                                 <button x-bind:class="selectedOperation.obfuscator === `{{ o.name|e }}` ? 'selected' : ''"
@@ -132,7 +164,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center width-100">
+                                        <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center width-100">
                                             <div class="toggleContainer">
                                                 <label for="toggleAutonomous">Manual</label>
                                                 <div class="toggleSwitch mx-2">
@@ -148,35 +180,6 @@
                                             </span>
                                                 </div>
                                                 <label for="toggleAutonomous">Autonomous</label>
-                                            </div>
-
-                                            <div>
-                                                <button type="button" title="delete operation"
-                                                        class="ml-2 button is-primary is-small"
-                                                        x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
-                                                </button>
-                                                <button title="download event logs"
-                                                        class="button is-primary is-small ml-2"
-                                                        x-on:click="openModal = 'showDownloadMenu'"><i
-                                                        class="pr-1 fas fa-arrow-down"></i>
-                                                </button>
-                                                <!--                        TODO add modal to download button-->
-                                                <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
-                                                <!--                            <div class="mr-2">-->
-                                                <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
-                                                <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
-                                                <!--                            </div>-->
-                                                <!--                            <div class="is-flex mt-2">-->
-                                                <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
-                                                <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
-                                                <!--                                    report-->
-                                                <!--                                </button>-->
-                                                <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
-                                                <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
-                                                <!--                                    logs-->
-                                                <!--                                </button>-->
-                                                <!--                            </div>-->
-                                                <!--                        </div>-->
                                             </div>
                                         </div>
                                     </div>
