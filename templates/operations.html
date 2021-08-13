@@ -60,7 +60,7 @@
                             </template>
                         </div>
                         <template x-if="showOperationsMenuCaret">
-                            <div class="ml-2">
+                            <div class="ml-2 scroll-more-caret">
                                 <i class="fas fa-angle-right"></i>
                             </div>
                         </template>
@@ -190,9 +190,9 @@
 
             <template x-if="selectedOperation">
                 <div class="width-100 is-flex is-justify-content-center">
-                    <button class="button no-style"
+                    <button class="button no-style caret-button"
                             type="button"
-                            x-on:click="isOperationsControlsExpanded = !isOperationsControlsExpanded">
+                            x-on:click="isOperationsControlsExpanded = !isOperationsControlsExpanded; getOperationsMenuCaretDisplay()">
                         <i x-show="isOperationsControlsExpanded" class="fas fa-angle-up"></i>
                         <i x-show="!isOperationsControlsExpanded" class="fas fa-angle-down"></i>
                     </button>
@@ -237,8 +237,9 @@
                                             x-bind:class="selectedLink === link ? 'selected' : ''"
                                             x-on:click="selectedLink = link; getResults(link.id);">
                                             <td class="decideColumn">
-                                                <span x-text="link.decide"></span>
-                                                <span x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
+                                                <span x-text="getHumanFriendlyTime(link.decide)"></span>
+                                                <span x-bind:class="'status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"
+                                                      x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
                                             </td>
                                             <td class="linkStatusColumn">
                                                 <span x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
@@ -690,6 +691,7 @@
     };
     const linkStatuses = {
         '0': 'success',
+        '-1': 'paused',
         '1': 'failure',
         '-2': 'remove',
         '-3': 'collect',
@@ -774,7 +776,7 @@
                     hMonth = '';
                     break;
             }
-            fuzzy = hMonth + ' ' + hDate;
+            fuzzy = hMonth + ' ' + hDate + ' ' + hTime.join(':');
         }
         return fuzzy;
     }
@@ -1198,7 +1200,8 @@
     }
 
     .operation-menu-links .readable-time {
-        width: max-content;
+        width: 3.9em;
+        text-align: center;
         color: gray;
     }
 
@@ -1482,6 +1485,16 @@
         background-color: initial !important;
     }
 
+    .caret-button {
+        font-size: 1.4em;
+        padding-top: 1em;
+        padding-bottom: 0;
+    }
+
+    .scroll-more-caret {
+        color: gray;
+    }
+
     label[for="stealth-jitterMin"], label[for="stealth-jitterMax"] {
         position: relative;
         margin-top: -40px;
@@ -1546,7 +1559,7 @@
     }
 
     .log-container td.decideColumn {
-        padding: 0 1em;
+        padding: 3em 2em 0;
         display: flex;
         flex-flow: column wrap;
         justify-content: center;
@@ -1607,7 +1620,7 @@
     }
 
     /*gray timeline*/
-    table tbody td span.linkStatus::before {
+    span.linkStatus::before {
         width: 2px;
         height: 170px;
         background-color: white;
@@ -1623,7 +1636,7 @@
     }
 
     /*circle for event*/
-    table tbody td span.linkStatus::after {
+    span.linkStatus::after {
         position: relative;
         left: -5px;
         top: 50px;
@@ -1633,41 +1646,77 @@
         height: 2em;
         width: 2em;
         content: "";
-        box-shadow: 0 0 0 0.2em #555; /*queued*/
+    }
+
+    /*queued*/
+    span.status-queued {
+        color: #555;
+    }
+    span.status-queued::after {
+        box-shadow: 0 0 0 0.2em #555;
     }
 
     /*success*/
-    table tbody td span.status-success::after {
+    span.status-success {
+        color: #4a9;
+    }
+    span.status-success::after {
         box-shadow: 0 0 0 0.2em #4a9;
     }
 
     /*failure*/
-    table tbody td span.status-failure::after {
+    span.status-failure {
+        color: #c31;
+    }
+    span.status-failure::after {
         box-shadow: 0 0 0 0.2em #c31;
     }
 
+    /*paused*/
+    span.status-paused {
+        color: #ffc500;
+    }
+    span.status-paused::after {
+        box-shadow: 0 0 0 0.2em #ffc500;
+    }
+
     /*removed*/
-    table tbody td span.status-remove::after {
+    span.status-remove {
+        color: #a05195;
+    }
+    span.status-remove::after {
         box-shadow: 0 0 0 0.2em #a05195;
     }
 
     /*collected*/
-    table tbody td span.status-collect::after {
+    span.status-collect {
+        color: #ffb000;
+    }
+    span.status-collect::after {
         box-shadow: 0 0 0 0.2em #ffb000;
     }
 
     /*untrusted*/
-    table tbody td span.status-untrusted::after {
+    span.status-untrusted {
+        color: white;
+    }
+    span.status-untrusted::after {
         box-shadow: 0 0 0 0.2em white;
     }
 
     /*visible*/
-    table tbody td span.status-visible::after {
+    span.status-visible {
+        color: #f012be;
+    }
+    span.status-visible::after {
         box-shadow: 0 0 0 0.2em #f012be;
     }
 
     /*timeout*/
-    table tbody td span.status-timeout::after {
+    span.status-timeout {
+        color: cornflowerblue;
+    }
+    span.status-timeout::after {
         box-shadow: 0 0 0 0.2em cornflowerblue;
     }
 </style>
