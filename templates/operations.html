@@ -113,7 +113,6 @@
                                             <i alt="run one step" class="fas fa-play"><sub>1</sub></i></button>
                                     </div>
 
-<!--                                    TODO DELETE/DOWNLOAD OP-->
                                     <template x-if="isOperationsControlsExpanded">
                                         <div class="is-flex is-justify-content-center pt-2">
                                             <button title="download event logs"
@@ -121,26 +120,10 @@
                                                     x-on:click="openModal = 'showDownloadMenu'"><i
                                                     class="pr-1 fas fa-arrow-down"></i>
                                             </button>
-                                            <!--                        TODO add modal to download button-->
-                                            <!--                        <div class="column is-flex is-align-items-flex-end is-flex-direction-column">-->
-                                            <!--                            <div class="mr-2">-->
-                                            <!--                                <input id="agent-output" type="checkbox" x-model="isAgentOutputSelected">-->
-                                            <!--                                <label class="pl-1 is-small" for="agent-output">include agent output</label>-->
-                                            <!--                            </div>-->
-                                            <!--                            <div class="is-flex mt-2">-->
-                                            <!--                                <button title="download full report" class="button is-primary is-small ml-2"-->
-                                            <!--                                        x-on:click="downloadInfo('full-report')"><i class="pr-1 fas fa-arrow-down"></i>Full-->
-                                            <!--                                    report-->
-                                            <!--                                </button>-->
-                                            <!--                                <button title="download event logs" class="button is-primary is-small ml-2"-->
-                                            <!--                                        x-on:click="downloadInfo('event-logs')"><i class="pr-1 fas fa-arrow-down"></i>Event-->
-                                            <!--                                    logs-->
-                                            <!--                                </button>-->
-                                            <!--                            </div>-->
-                                            <!--                        </div>-->
                                             <button type="button" title="delete operation"
                                                     class="mx-2 button no-style"
-                                                    x-on:click="deleteOperation()"><i class="pr-1 fas fa-trash"></i>
+                                                    x-on:click="openModal = 'deleteOperationModal'"><i
+                                                    class="pr-1 fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </template>
@@ -656,14 +639,76 @@
                                 </section>
                             </div>
                         </template>
+
+                        <template x-if="openModal === 'showDownloadMenu'">
+                            <div>
+                                <header class="modal-card-head">
+                                    <p class="modal-card-title">Download</p>
+                                </header>
+                                <section class="modal-card-body">
+                                    <div class="modal-form">
+                                        <div>
+                                            <label for="agent-output-field">Agent output:</label>
+                                            <div class="modal-form-fields" id="agent-output-field">
+                                                <input id="agent-output" type="checkbox"
+                                                       class="mr-1"
+                                                       x-model="isAgentOutputSelected">
+                                                <label for="agent-output">include</label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="report-type">Report type:</label>
+                                            <div class="modal-form-fields download-buttons-container" id="report-type">
+                                                <button title="download full report"
+                                                        class="button is-primary is-small ml-2"
+                                                        x-on:click="downloadInfo('full-report')"><i
+                                                        class="pr-1 fas fa-arrow-down"></i>
+                                                    Full report
+                                                </button>
+                                                <button title="download event logs"
+                                                        class="button is-primary is-small ml-2"
+                                                        x-on:click="downloadInfo('event-logs')"><i
+                                                        class="pr-1 fas fa-arrow-down"></i>
+                                                    Event logs
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+
+                        <template x-if="openModal === 'deleteOperationModal'">
+                            <div>
+                                <header class="modal-card-head">
+                                    <p class="modal-card-title">Delete operation?</p>
+                                </header>
+                                <section class="modal-card-body">
+                                    <div class="modal-form">
+                                        <div>
+                                            <p>Are you sure you want to delete the operation <em
+                                                    x-text="selectedOperation.name"></em>?</p>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+
                         <footer class="modal-card-foot is-flex is-justify-content-space-between is-align-items-center width-100">
-                            <template x-if="openModal === 'addLink'">
+                            <template x-if="openModal === 'addLink' || openModal === 'showDownloadMenu'">
                                 <button class="button p-0 ml-2 is-primary width-100" x-on:click="openModal = null">
                                     Close
                                 </button>
                             </template>
-                            <template x-if="openModal !== 'addLink'">
-                                <button class="button p-0 ml-2" x-on:click="openModal = null">Cancel
+                            <template x-if="!(openModal === 'addLink' || openModal === 'showDownloadMenu')">
+                                <button class="button p-0 ml-2" x-on:click="openModal = null">
+                                    Cancel
+                                </button>
+                            </template>
+                            <template x-if="openModal === 'deleteOperationModal'">
+                                <button class="button p-0 is-primary"
+                                        x-on:click="deleteOperation(); openModal = null;">
+                                    Yes
                                 </button>
                             </template>
                             <template x-if="openModal === 'addCommand'">
@@ -1309,6 +1354,10 @@
         font-size: 0.75rem;
     }
 
+    .modal-form-fields.download-buttons-container button {
+        width: fit-content;
+    }
+
     .modal-results ul {
         margin-left: 0;
     }
@@ -1655,6 +1704,7 @@
     span.status-queued {
         color: #555;
     }
+
     span.status-queued::after {
         box-shadow: 0 0 0 0.2em #555;
     }
@@ -1663,6 +1713,7 @@
     span.status-success {
         color: #4a9;
     }
+
     span.status-success::after {
         box-shadow: 0 0 0 0.2em #4a9;
     }
@@ -1671,6 +1722,7 @@
     span.status-failure {
         color: #c31;
     }
+
     span.status-failure::after {
         box-shadow: 0 0 0 0.2em #c31;
     }
@@ -1679,6 +1731,7 @@
     span.status-paused {
         color: #ffc500;
     }
+
     span.status-paused::after {
         box-shadow: 0 0 0 0.2em #ffc500;
     }
@@ -1687,6 +1740,7 @@
     span.status-remove {
         color: #a05195;
     }
+
     span.status-remove::after {
         box-shadow: 0 0 0 0.2em #a05195;
     }
@@ -1695,6 +1749,7 @@
     span.status-collect {
         color: #ffb000;
     }
+
     span.status-collect::after {
         box-shadow: 0 0 0 0.2em #ffb000;
     }
@@ -1703,6 +1758,7 @@
     span.status-untrusted {
         color: white;
     }
+
     span.status-untrusted::after {
         box-shadow: 0 0 0 0.2em white;
     }
@@ -1711,6 +1767,7 @@
     span.status-visible {
         color: #f012be;
     }
+
     span.status-visible::after {
         box-shadow: 0 0 0 0.2em #f012be;
     }
@@ -1719,6 +1776,7 @@
     span.status-timeout {
         color: cornflowerblue;
     }
+
     span.status-timeout::after {
         box-shadow: 0 0 0 0.2em cornflowerblue;
     }
