@@ -909,7 +909,7 @@
 
             getOperationsMenuCaretDisplay() {
                 const el = document.querySelector('.operation-menu-container');
-                this.showOperationsMenuCaret = el.scrollWidth > el.offsetWidth;
+                setTimeout(() => {this.showOperationsMenuCaret = el.scrollWidth > el.offsetWidth}, 100); // timeout is to wait for UI changes to get accurate width calcs
             },
 
             get selectedAgent() {
