@@ -224,9 +224,9 @@
                                             <td class="linkInfoColumn"
                                                 x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
                                             <td x-bind:class="selectedLink === link ? '' : 'linkInfoColumn'">
-                                                <p>Agent #<em x-text="link.paw"></em></p>
-                                                <p x-show="selectedLink === link">Host: <em x-text="link.host"></em></p>
-                                                <p x-show="selectedLink === link">pid: <em x-text="link.pid"></em></p>
+                                                <p x-show="link.paw">Agent #<em x-text="link.paw"></em></p>
+                                                <p x-show="selectedLink === link && link.host">Host: <em x-text="link.host"></em></p>
+                                                <p x-show="selectedLink === link && link.pid">pid: <em x-text="link.pid"></em></p>
                                             </td>
 
 
