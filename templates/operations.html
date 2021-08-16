@@ -304,7 +304,7 @@
                                         <td>New Manual Command</td>
                                         <td>
                                             <label x-show="false" for="manual-agent">Choose an agent:</label>
-                                            <select id="manual-agent" x-model="selectedAgentIndex">
+                                            <select id="manual-agent" x-model="selectedAgentIndex" required>
                                                 <option selected>Choose agent</option>
                                                 <template
                                                         x-for="(agent, index) in selectedOperation.host_group">
@@ -313,7 +313,7 @@
                                                 </template>
                                             </select>
                                         </td>
-                                        <td x-show="selectedAgentIndex">
+                                        <td x-show="selectedAgentInde">
                                             <select x-model="manualCommand.executor"
                                                     id="manual-executor"
                                                     class="column executor-selector">
@@ -344,7 +344,7 @@
                                                     </button>
                                                     <button type="button"
                                                             class="button is-primary is-small mt-2"
-                                                            x-on:click="handleManualCommand(); addNewRow = false;">
+                                                            x-on:click="handleManualCommand();">
                                                         Add Command
                                                     </button>
                                                 </div>
@@ -1025,6 +1025,7 @@
             handleManualCommand() {
                 if (!this.manualCommand.command) {
                     toast('Enter manual command.');
+                    this.addNewRow = false;
                     return;
                 }
                 this.manualCommand.agent = this.selectedAgent.paw;
@@ -1037,7 +1038,8 @@
                     else {
                         toast('Added manual command.', true);
                         this.getOperation();
-                        this.resetObject(this.manualCommand)
+                        this.resetObject(this.manualCommand);
+                        this.selectedAgentIndex = null;
                     }
                 })
             },
