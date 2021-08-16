@@ -190,84 +190,90 @@
                 <template x-if="selectedOperation">
                     <div x-show="selectedOperationID">
                         <div class="navbar-divider mb-5 width-100"></div>
-
                         <div class="log-container">
-                            <template x-if="selectedOperation.chain.length === 0">
-                                <em>No links––click the buttons on the right to add commands/links.</em>
-                            </template>
-                            <template x-if="selectedOperation.chain.length > 0">
-                                <table class="table">
-                                    <thead>
-                                    <tr class="table-header">
-                                        <th class="decideColumn">Decide / Status</th>
-                                        <th title="Link Status Indicator"></th>
-                                        <th class="infoColumn">Link/Ability Name</th>
-                                        <th>Agent</th>
-                                        <th>Link Command</th>
-                                        <th>Link Output & Facts</th>
+                            <table class="table">
+                                <thead>
+                                <tr class="table-header">
+                                    <th class="decideColumn">Decide / Status</th>
+                                    <th title="Link Status Indicator"></th>
+                                    <th class="infoColumn">Link/Ability Name</th>
+                                    <th>Agent</th>
+                                    <th>Link Command</th>
+                                    <th>Link Output & Facts</th>
+                                </tr>
+                                </thead>
+
+                                <template x-if="selectedOperation.chain.length === 0">
+                                    <tbody>
+                                    <tr>
+                                        <td colspan="6"><em>No links––click the buttons on the right to add commands/links.</em>
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <template x-for="(link, index) in selectedOperation.chain">
-                                        <tbody :key="index">
-                                        <tr x-bind:id="link.id"
-                                            x-bind:class="selectedLink === link ? 'selected' : ''"
-                                            x-on:click="selectedLink = link; getResults(link.id);">
-                                            <td class="decideColumn">
-                                                <span x-text="getHumanFriendlyTime(link.decide)"></span>
-                                                <span x-bind:class="'status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"
-                                                      x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
-                                            </td>
-                                            <td class="linkStatusColumn">
+                                    </tbody>
+                                </template>
+                                <template x-for="(link, index) in selectedOperation.chain">
+                                    <tbody :key="index">
+                                    <tr x-bind:id="link.id"
+                                        x-bind:class="selectedLink === link ? 'selected' : ''"
+                                        x-on:click="selectedLink = link; getResults(link.id);">
+                                        <td class="decideColumn">
+                                            <span x-text="getHumanFriendlyTime(link.decide)"></span>
+                                            <span x-bind:class="'status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"
+                                                  x-text="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"></span>
+                                        </td>
+                                        <td class="linkStatusColumn">
                                                     <span x-bind:title="(link.status in linkStatuses) ? linkStatuses[link.status] : 'queued'"
                                                           x-bind:class="'linkStatus status-'+((link.status in linkStatuses) ? linkStatuses[link.status] : 'queued')"></span>
-                                            </td>
-                                            <td class="linkInfoColumn"
-                                                x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
-                                            <td x-bind:class="selectedLink === link ? '' : 'linkInfoColumn'">
-                                                <p x-show="link.paw">Agent #<em x-text="link.paw"></em></p>
-                                                <p x-show="selectedLink === link && link.host">Host: <em x-text="link.host"></em></p>
-                                                <p x-show="selectedLink === link && link.pid">pid: <em x-text="link.pid"></em></p>
-                                            </td>
+                                        </td>
+                                        <td class="linkInfoColumn"
+                                            x-text="link.ability.name + ((link.ability.cleanup) ? '(CLEANUP)' : '')"></td>
 
+                                        <!--AGENT COLUMN-->
+                                        <td x-bind:class="selectedLink === link ? '' : 'linkInfoColumn'">
+                                            <p x-show="link.paw">Agent #<em x-text="link.paw"></em></p>
+                                            <p x-show="selectedLink === link && link.host">Host: <em
+                                                    x-text="link.host"></em></p>
+                                            <p x-show="selectedLink === link && link.pid">pid: <em
+                                                    x-text="link.pid"></em></p>
+                                        </td>
 
-                                            <td x-show="index === 0 && !selectedLink">
+                                        <!--COMMAND COLUMN-->
+                                        <td class="outputEditCommand">
+                                            <template x-if="index === 0 && !selectedLink">
                                                 <em>Click on a link to show more details.</em>
-                                            </td>
-                                            <!--COMMAND COLUMN-->
-                                            <td x-show="selectedLink === link" class="outputEditCommand">
-                                                <template
-                                                        x-if="selectedLinkCommand.length > 0 && selectedLink !== link">
-                                                    <div class="is-flex is-align-items-flex-end is-justify-content-centeru is-flex-direction-column">
-                                                                <textarea id="edit-command"
-                                                                          class="code"
-                                                                          readonly
-                                                                          x-text="selectedLinkCommand"
-                                                                          spellcheck="false"></textarea>
-                                                        <button type="button"
-                                                                title="edit command"
-                                                                class="button is-primary is-small"
-                                                                x-bind:disabled="!selectedLink || selectedLink?.status === -1 || selectedLink.finish || selectedLink.output"
-                                                                x-on:click="showLinkEditCommandID = (showLinkEditCommandID === selectedLink?.id) ? null : selectedLink?.id">
-                                                            <i class="fas fa-pencil-alt editCommand"></i>
-                                                        </button>
-                                                    </div>
-                                                </template>
-                                                <template x-if="selectedLink === link">
-                                                    <div class="is-flex is-align-items-flex-end is-justify-content-centeru is-flex-direction-column">
-                                                                <textarea id="edit-command"
-                                                                          class="code"
-                                                                          contenteditable
-                                                                          x-model="editedCommand"
-                                                                          spellcheck="false"></textarea>
-                                                        <button type="button"
-                                                                class="button is-primary is-small"
-                                                                x-on:click="updateLinkState(selectedLink?.id, -3, editedCommand); showLinkEditCommandID = null;">
-                                                            Update
-                                                        </button>
-                                                    </div>
-                                                </template>
-                                            </td>
-                                            <td x-show="selectedLink === link">
+                                            </template>
+                                            <template
+                                                    x-if="selectedLink === link && !(selectedLink?.status === -1 || selectedLink.finish || selectedLink.output)">
+                                                <div class="is-flex is-align-items-flex-end is-justify-content-center is-flex-direction-column">
+                                                    <label x-show="false" for="view-command">View command</label>
+                                                    <textarea id="view-command"
+                                                              class="code"
+                                                              readonly
+                                                              x-text="selectedLinkCommand"
+                                                              spellcheck="false"></textarea>
+                                                </div>
+                                            </template>
+                                            <template
+                                                    x-if="selectedLink === link && (selectedLink?.status === -1 || selectedLink.finish || selectedLink.output)">
+                                                <div class="is-flex is-align-items-flex-end is-justify-content-center is-flex-direction-column">
+                                                    <label x-show="false" for="edit-command">Edit command</label>
+                                                    <textarea id="edit-command"
+                                                              class="code"
+                                                              contenteditable
+                                                              x-model="editedCommand"
+                                                              spellcheck="false"></textarea>
+                                                    <button type="button"
+                                                            class="button is-primary is-small"
+                                                            x-on:click="updateLinkState(selectedLink?.id, -3, editedCommand); showLinkEditCommandID = null;">
+                                                        Update
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </td>
+
+                                        <!--OUTPUT/FACTS COLUMN-->
+                                        <td>
+                                            <template x-if="selectedLink === link">
                                                 <template x-if="selectedLinkOutput">
                                                     <div class="mb-5">
                                                         <p>Output: </p>
@@ -283,43 +289,46 @@
                                                 <template x-if="selectedLinkFacts.length < 1">
                                                     <p>No facts available.</p>
                                                 </template>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </template>
-                                    <tbody>
-                                    <template x-if="addNewRow">
-                                        <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td>New Manual Command</td>
-                                            <td>
-                                                <label x-show="false" for="manual-agent">Choose an agent:</label>
-                                                <select id="manual-agent" x-model="selectedAgentIndex">
-                                                    <option selected>Choose agent</option>
-                                                    <template
-                                                            x-for="(agent, index) in selectedOperation.host_group">
-                                                        <option :value="index"
-                                                                x-text="agent.display_name + '-' + agent.paw"></option>
-                                                    </template>
-                                                </select>
-                                            </td>
-                                            <td x-show="selectedAgentIndex">
-                                                <select x-model="manualCommand.executor"
-                                                        id="manual-executor"
-                                                        class="column executor-selector">
-                                                    <option>Choose executor</option>
-                                                    <template
-                                                            x-for="(executor, index) in selectedAgentExecutors">
-                                                        <option x-text="executor"
-                                                                :value="selectedAgent.executors[index]"
-                                                                x-bind:selected="index === 0"></option>
-                                                    </template>
-                                                </select>
-                                            </td>
-                                            <td x-show="selectedAgentIndex">
-                                                <label x-show="false" for="input-command">Type manual command:</label>
-                                                <div class="is-flex is-align-items-flex-end is-justify-content-center is-flex-direction-column">
+                                            </template>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </template>
+
+                                <!--                                NEW ROW TO ADD MANUAL COMMAND-->
+                                <tbody>
+                                <template x-if="addNewRow">
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td>New Manual Command</td>
+                                        <td>
+                                            <label x-show="false" for="manual-agent">Choose an agent:</label>
+                                            <select id="manual-agent" x-model="selectedAgentIndex">
+                                                <option selected>Choose agent</option>
+                                                <template
+                                                        x-for="(agent, index) in selectedOperation.host_group">
+                                                    <option :value="index"
+                                                            x-text="agent.display_name + '-' + agent.paw"></option>
+                                                </template>
+                                            </select>
+                                        </td>
+                                        <td x-show="selectedAgentIndex">
+                                            <select x-model="manualCommand.executor"
+                                                    id="manual-executor"
+                                                    class="column executor-selector">
+                                                <option>Choose executor</option>
+                                                <template
+                                                        x-for="(executor, index) in selectedAgentExecutors">
+                                                    <option x-text="executor"
+                                                            :value="selectedAgent.executors[index]"
+                                                            x-bind:selected="index === 0"></option>
+                                                </template>
+                                            </select>
+                                        </td>
+                                        <td x-show="selectedAgentIndex">
+                                            <label x-show="false" for="input-command">Type manual command:</label>
+                                            <div class="is-flex is-align-items-flex-end is-justify-content-center is-flex-direction-column">
                                                 <textarea x-model="manualCommand.command"
                                                           class="input executor-command"
                                                           id="input-command"
@@ -327,45 +336,46 @@
                                                           spellcheck="false"
                                                           contenteditable
                                                           required></textarea>
-                                                    <div class="is-flex is-flex-direction-row is-align-items-flex-end">
-                                                        <button type="button"
-                                                                class="button is-small mr-2"
-                                                                x-on:click="addNewRow = false;">
-                                                            Cancel
-                                                        </button>
-                                                        <button type="button"
-                                                                class="button is-primary is-small mt-2"
-                                                                x-on:click="handleManualCommand(); addNewRow = false;">
-                                                            Add Command
-                                                        </button>
-                                                    </div>
+                                                <div class="is-flex is-flex-direction-row is-align-items-flex-end">
+                                                    <button type="button"
+                                                            class="button is-small mr-2"
+                                                            x-on:click="addNewRow = false;">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="button"
+                                                            class="button is-primary is-small mt-2"
+                                                            x-on:click="handleManualCommand(); addNewRow = false;">
+                                                        Add Command
+                                                    </button>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                    </tbody>
-                                    <tfoot>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="is-flex is-justify-content-flex-end mt-5">
-                                            <button title="add manual command" class="button is-primary is-small ml-2"
-                                                    x-on:click="addNewRow = true">
-                                                <i class="pr-1 fas fa-plus"></i>Manual
-                                                Command
-                                            </button>
-                                            <button title="add potential link" class="button is-primary is-small ml-2"
-                                                    x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Potential
-                                                Link
-                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                    </tfoot>
-                                </table>
-                            </template>
+                                </template>
+                                </tbody>
+
+                                <!--                                ADD COMMAND/LINK BUTTONS-->
+                                <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="is-flex is-justify-content-flex-end mt-5">
+                                        <button title="add manual command" class="button is-primary is-small ml-2"
+                                                x-on:click="addNewRow = true">
+                                            <i class="pr-1 fas fa-plus"></i>Manual
+                                            Command
+                                        </button>
+                                        <button title="add potential link" class="button is-primary is-small ml-2"
+                                                x-on:click="openModal = 'addLink'"><i class="pr-1 fas fa-plus"></i>Potential
+                                            Link
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
                 </template>
@@ -909,7 +919,9 @@
 
             getOperationsMenuCaretDisplay() {
                 const el = document.querySelector('.operation-menu-container');
-                setTimeout(() => {this.showOperationsMenuCaret = el.scrollWidth > el.offsetWidth}, 100); // timeout is to wait for UI changes to get accurate width calcs
+                setTimeout(() => {
+                    this.showOperationsMenuCaret = el.scrollWidth > el.offsetWidth
+                }, 1); // timeout is to wait for UI changes to get accurate width calcs
             },
 
             get selectedAgent() {
@@ -1659,7 +1671,7 @@
         padding-bottom: 0;
     }
 
-    table tbody td.outputEditCommand textarea[readonly] {
+    table tbody td.outputEditCommand textarea {
         color: #ff8181;
         background-color: #262626;
     }
