@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:kinetic-20220830
 SHELL ["/bin/bash", "-c"]
 
 ARG TZ="UTC"
